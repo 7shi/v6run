@@ -4,24 +4,15 @@
 #include <stddef.h>
 #include <vector>
 
-class BinData
+inline uint16_t read16(const std::vector<uint8_t> &vec, int pos)
 {
-public:
-    std::vector<uint8_t> Data;
-    bool UseOct;
+    return vec[pos] | (vec[pos + 1] << 8);
+}
 
-    BinData(int size);
-
-    inline uint16_t Read16(int pos)
-    {
-        return Data[pos] | (Data[pos + 1] << 8);
-    }
-
-    inline void Write16(int pos, uint16_t v)
-    {
-        Data[pos] = static_cast<uint8_t>(v);
-        Data[pos + 1] = static_cast<uint8_t>(v >> 8);
-    }
-};
+inline void write16(std::vector<uint8_t> *vec, int pos, uint16_t v)
+{
+    (*vec)[pos] = static_cast<uint8_t>(v);
+    (*vec)[pos + 1] = static_cast<uint8_t>(v >> 8);
+}
 
 #endif
