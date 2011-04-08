@@ -7,17 +7,16 @@
 class BinData
 {
 public:
-    int Offset;
     std::vector<uint8_t> Data;
     bool UseOct;
-    
+
     BinData(int size);
-    
+
     inline uint16_t Read16(int pos)
     {
         return Data[pos] | (Data[pos + 1] << 8);
     }
-    
+
     inline void Write16(int pos, uint16_t v)
     {
         Data[pos] = static_cast<uint8_t>(v);
