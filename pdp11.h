@@ -1,5 +1,5 @@
-#ifndef _BINDATA_H_
-#define _BINDATA_H_
+#ifndef _PDP11_H_
+#define _PDP11_H_
 
 #include <stddef.h>
 #include <vector>
