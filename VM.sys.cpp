@@ -80,6 +80,7 @@ void VM::_fork() // 2
     if (trace) debug("sys fork");
     int result = fork();
     r[0] = (C = (result == -1)) ? errno : result;
+    if (!C && result) r[7] += 2;
 }
 
 void VM::_read() // 3
