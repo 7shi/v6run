@@ -7,6 +7,7 @@ VM::VM(AOut *aout) : aout(aout), mem(65536), pid(nextPid++)
     isLong = isDouble = hasExited = Z = N = C = V = false;
     memset(r, 0, sizeof(r));
     memcpy(&mem[0], &aout->image[0], aout->image.size());
+    prevPC = 0;
     std::list<std::string> args;
     args.push_back(aout->path);
     setArgs(args);
@@ -47,10 +48,7 @@ void VM::run()
 {
     hasExited = false;
     while (!hasExited)
-    {
         runStep();
-        if (r[7] & 1) abort("invalid pc=" + hex(r[7]));
-    }
     for (std::vector<int>::iterator it = fds.begin(); it != fds.end(); ++it)
         close(*it);
     fds.clear();
@@ -58,7 +56,7 @@ void VM::run()
 
 void VM::abort(const std::string &msg)
 {
-    fprintf(stderr, msg.c_str());
+    fprintf(stderr, "pc=%04x: %s", prevPC, msg.c_str());
     hasExited = true;
 }
 
