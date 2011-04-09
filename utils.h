@@ -8,6 +8,8 @@
 std::string hex(int v);
 void setroot(std::string root);
 std::string convpath(const std::string &path);
+bool startsWith(const std::string &s, const std::string &prefix);
+bool endsWith(const std::string &s, const std::string &prefix);
 
 inline uint16_t readvec16(const std::vector<uint8_t> &vec, int pos)
 {
