@@ -18,6 +18,7 @@ private:
 
 public:
     VM(AOut *aout);
+    void set(AOut *aout);
 
     inline uint8_t read8(int pos) { return mem[pos]; }
     inline void write8(int pos, uint8_t v) { mem[pos] = v; }

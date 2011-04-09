@@ -1,7 +1,13 @@
 #include "VM.h"
 
-VM::VM(AOut *aout) : aout(aout), mem(65536)
+VM::VM(AOut *aout) : mem(65536)
 {
+    set(aout);
+}
+
+void VM::set(AOut *aout)
+{
+    this->aout = aout;
     isLong = isDouble = hasExited = Z = N = C = V = false;
     memset(r, 0, sizeof(r));
     memcpy(&mem[0], &aout->image[0], aout->image.size());
