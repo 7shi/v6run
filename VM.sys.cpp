@@ -60,9 +60,10 @@ void VM::sys()
 
 void VM::_indir() // 0
 {
+    int tmp = read16(getInc(7, 2));
     uint16_t bak = r[7];
     indirBak = &bak;
-    r[7] = read16(getInc(7, 2));
+    r[7] = tmp;
     sys();
     if (indirBak) r[7] = *indirBak;
 }
