@@ -17,7 +17,7 @@ private:
     bool Z, N, C, V;
 
 public:
-    bool verbose;
+    int trace;
 
     VM(AOut *aout);
     void set(AOut *aout);

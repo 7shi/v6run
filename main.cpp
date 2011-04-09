@@ -3,7 +3,7 @@
 
 int main(int argc, char *argv[])
 {
-    bool verbose = false;
+    int trace = 0;
     std::vector<std::string> args;
     for (int i = 1; i < argc; i++)
     {
@@ -14,13 +14,17 @@ int main(int argc, char *argv[])
             if (i < argc) setroot(argv[i]);
         }
         else if (arg == "-v")
-            verbose = true;
+            trace = 2;
+        else if (arg == "-s" && trace == 0)
+            trace = 1;
         else
             args.push_back(arg);
     }
     if (args.empty())
     {
-        printf("usage: %s [-r V6ROOT] [-v] cmd [args ...]\n", argv[0]);
+        printf("usage: %s [-r V6ROOT] [-v/-s] cmd [args ...]\n", argv[0]);
+        printf("    -v: verbose mode (output syscall and disassemble)\n");
+        printf("    -s: syscall mode (output syscall)\n");
         return 1;
     }
     AOut aout = convpath(args[0]);
@@ -30,6 +34,6 @@ int main(int argc, char *argv[])
         return 0;
     }
     VM vm = &aout;
-    vm.verbose = verbose;
+    vm.trace = trace;
     vm.run(args);
 }

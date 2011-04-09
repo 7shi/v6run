@@ -1,6 +1,6 @@
 #include "VM.h"
 
-VM::VM(AOut *aout) : mem(65536), verbose(false)
+VM::VM(AOut *aout) : mem(65536), trace(0)
 {
     set(aout);
 }

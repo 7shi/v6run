@@ -61,7 +61,7 @@ void VM::sys()
 void VM::_indir() // 0
 {
     int tmp = read16(getInc(7, 2));
-    if (verbose) debug("sys indir; " + hex(tmp));
+    if (trace) debug("sys indir; " + hex(tmp));
     uint16_t bak = r[7];
     indirBak = &bak;
     r[7] = tmp;
@@ -71,13 +71,13 @@ void VM::_indir() // 0
 
 void VM::_exit() // 1
 {
-    if (verbose) debug("sys exit");
+    if (trace) debug("sys exit");
     exit(r[0]);
 }
 
 void VM::_fork() // 2
 {
-    if (verbose) debug("sys fork");
+    if (trace) debug("sys fork");
     int result = fork();
     r[0] = (C = (result == -1)) ? errno : result;
 }
@@ -87,7 +87,7 @@ void VM::_read() // 3
     int fd = r[0];
     int buf = read16(getInc(7, 2));
     int len  = read16(getInc(7, 2));
-    if (verbose) debug("sys read; " + hex(buf) + "; " + hex(len));
+    if (trace) debug("sys read; " + hex(buf) + "; " + hex(len));
     int max = mem.size() - buf;
     if (len > max) len = max;
     int result = read(fd, &mem[buf], len);
@@ -99,7 +99,7 @@ void VM::_write() // 4
     int fd = r[0];
     int buf = read16(getInc(7, 2));
     int len = read16(getInc(7, 2));
-    if (verbose) debug("sys write; " + hex(buf) + "; " + hex(len));
+    if (trace) debug("sys write; " + hex(buf) + "; " + hex(len));
     int max = mem.size() - buf;
     if (len > max) len = max;
     int result = write(fd, &mem[buf], len);
@@ -110,7 +110,7 @@ void VM::_open() // 5
 {
     std::string path = getPath(getInc(7, 2));
     int mode = read16(getInc(7, 2));
-    if (verbose) debug("sys open; \"" + path + "\"; 0" + oct(mode, 3));
+    if (trace) debug("sys open; \"" + path + "\"; 0" + oct(mode, 3));
     int result = open(path.c_str(), mode);
     r[0] = (C = (result == -1)) ? errno : result;
 }
@@ -118,14 +118,14 @@ void VM::_open() // 5
 void VM::_close() // 6
 {
     int fd = r[0];
-    if (verbose) debug("sys close");
+    if (trace) debug("sys close");
     int result = close(fd);
     r[0] = (C = (result == -1)) ? errno : result;
 }
 
 void VM::_wait() // 7
 {
-    if (verbose) debug("sys wait");
+    if (trace) debug("sys wait");
     int status;
     int result = wait(&status);
     r[1] = status;
@@ -136,7 +136,7 @@ void VM::_creat() // 8
 {
     std::string path = getPath(getInc(7, 2));
     int mode = read16(getInc(7, 2));
-    if (verbose) debug("sys creat; \"" + path + "\"; 0" + oct(mode, 3));
+    if (trace) debug("sys creat; \"" + path + "\"; 0" + oct(mode, 3));
     int result = creat(path.c_str(), mode);
     r[0] = (C = (result == -1)) ? errno : result;
 }
@@ -145,7 +145,7 @@ void VM::_link() // 9
 {
     std::string src = getPath(getInc(7, 2));
     std::string dst = getPath(getInc(7, 2));
-    if (verbose) debug("sys link; \"" + src + "\"; \"" + dst + "\"");
+    if (trace) debug("sys link; \"" + src + "\"; \"" + dst + "\"");
     int result = link(src.c_str(), dst.c_str());
     r[0] = (C = (result == -1)) ? errno : result;
 }
@@ -153,7 +153,7 @@ void VM::_link() // 9
 void VM::_unlink() // 10
 {
     std::string path = getPath(getInc(7, 2));
-    if (verbose) debug("sys unlink; \"" + path + "\"");
+    if (trace) debug("sys unlink; \"" + path + "\"");
     int result = unlink(path.c_str());
     r[0] = (C = (result == -1)) ? errno : result;
 }
@@ -162,7 +162,7 @@ void VM::_exec() // 11
 {
     std::string path = getPath(getInc(7, 2));
     std::vector<std::string> args = getArgs(-1, read16(getInc(7, 2)));
-    if (verbose)
+    if (trace)
     {
         std::string buf = "sys exec; \"" + path + "\"; { ";
         for (int i = 0; i < (int)args.size(); i++)
@@ -193,14 +193,14 @@ void VM::_exec() // 11
 void VM::_chdir() // 12
 {
     std::string path = getPath(getInc(7, 2));
-    if (verbose) debug("sys chdir; \"" + path + "\"");
+    if (trace) debug("sys chdir; \"" + path + "\"");
     int result = chdir(path.c_str());
     r[0] = (C = (result == -1)) ? errno : result;
 }
 
 void VM::_time() // 13
 {
-    if (verbose) debug("sys time");
+    if (trace) debug("sys time");
     time_t result = time(NULL);
     r[0] = result >> 16;
     r[1] = result;
@@ -218,7 +218,7 @@ void VM::_chmod() // 15
 {
     std::string path = getPath(getInc(7, 2));
     int mode = read16(getInc(7, 2));
-    if (verbose) debug("sys chmod; \"" + path + "\"; 0" + oct(mode, 3));
+    if (trace) debug("sys chmod; \"" + path + "\"; 0" + oct(mode, 3));
     int result = chmod(path.c_str(), mode);
     r[0] = (C = (result == -1)) ? errno : result;
 }
@@ -233,7 +233,7 @@ void VM::_chown() // 16
 void VM::_break() // 17
 {
     int nd = read16(getInc(7, 2));
-    if (verbose) debug("sys break; " + hex(nd));
+    if (trace) debug("sys break; " + hex(nd));
     if (nd < aout->tsize + aout->dsize || nd >= r[6])
     {
         r[0] = 0;
@@ -247,7 +247,7 @@ void VM::_stat() // 18
 {
     std::string path = getPath(getInc(7, 2));
     int p = read16(getInc(7, 2));
-    if (verbose) debug("sys stat; \"" + path + "\"; " + hex(p));
+    if (trace) debug("sys stat; \"" + path + "\"; " + hex(p));
     int *pst = (int *)&mem[p];
     struct stat st;
     int result = stat(path.c_str(), &st);
@@ -266,7 +266,7 @@ void VM::_seek() // 19
     int fd = r[0];
     int p = read16(getInc(7, 2));
     int t = read16(getInc(7, 2));
-    if (verbose) debug("sys seek; " + hex(p) + "; " + str(t));
+    if (trace) debug("sys seek; " + hex(p) + "; " + str(t));
     int result;
     switch (t)
     {
@@ -282,7 +282,7 @@ void VM::_seek() // 19
 
 void VM::_getpid() // 20
 {
-    if (verbose) debug("sys getpid");
+    if (trace) debug("sys getpid");
     int result = getpid();
     r[0] = (C = (result == -1)) ? errno : result;
 }
@@ -355,7 +355,7 @@ void VM::_nice() // 34
 
 void VM::_sleep() // 35
 {
-    if (verbose) debug("sys sleep");
+    if (trace) debug("sys sleep");
     int result = sleep(r[0]);
     r[0] = (C = (result == -1)) ? errno : result;
 }
@@ -381,7 +381,7 @@ void VM::_switch() // 38
 
 void VM::_dup() // 41
 {
-    if (verbose) debug("sys dup");
+    if (trace) debug("sys dup");
     int result = dup(r[0]);
     r[0] = (C = (result == -1)) ? errno : result;
 }
