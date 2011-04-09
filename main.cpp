@@ -18,7 +18,8 @@ int main(int argc, char *argv[])
         else if (arg == "-s" && trace == 0)
             trace = 1;
         else
-            args.push_back(arg);
+            for (; i < argc; i++)
+                args.push_back(argv[i]);
     }
     if (args.empty())
     {
