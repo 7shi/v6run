@@ -9,13 +9,12 @@ public:
     uint16_t r[8];
 
 private:
+    static VM *current;
     AOut *aout;
     std::vector<uint8_t> mem;
-    uint16_t prevPC;
-    int pid;
+    uint16_t prevPC, *nextPC;
     bool isLong, isDouble, hasExited;
     bool Z, N, C, V;
-    std::vector<int> fds;
 
 public:
     VM(AOut *aout);
@@ -76,6 +75,7 @@ public:
 private:
     void getSrcDst(Operand *src, Operand *dst, int size);
     void getDst(Operand *dst, int size, int len = 2);
+    void clearHandlers();
 
     void sys();
     void _indir (); //  0
@@ -120,4 +120,5 @@ private:
     void _setgid(); // 46
     void _getgid(); // 47
     void _signal(); // 48
+    static void sighandler(int sig);
 };

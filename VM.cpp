@@ -1,13 +1,12 @@
 #include "VM.h"
 
-static int nextPid = 1;
-
-VM::VM(AOut *aout) : aout(aout), mem(65536), pid(nextPid++)
+VM::VM(AOut *aout) : aout(aout), mem(65536)
 {
     isLong = isDouble = hasExited = Z = N = C = V = false;
     memset(r, 0, sizeof(r));
     memcpy(&mem[0], &aout->image[0], aout->image.size());
     prevPC = 0;
+    nextPC = NULL;
     std::list<std::string> args;
     args.push_back(aout->path);
     setArgs(args);
@@ -47,11 +46,7 @@ void VM::run(std::list<std::string> args)
 void VM::run()
 {
     hasExited = false;
-    while (!hasExited)
-        runStep();
-    for (std::vector<int>::iterator it = fds.begin(); it != fds.end(); ++it)
-        close(*it);
-    fds.clear();
+    while (!hasExited) runStep();
 }
 
 void VM::abort(const std::string &msg)

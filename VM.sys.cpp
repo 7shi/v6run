@@ -369,10 +369,3 @@ void VM::_getgid() // 47
     fprintf(stderr, "sys getgid: not implemented\n");
     C = true;
 }
-
-void VM::_signal() // 48
-{
-    r[7] += 4;
-    fprintf(stderr, "sys signal: not implemented\n");
-    C = true;
-}
