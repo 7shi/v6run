@@ -23,7 +23,7 @@ int main(int argc, char *argv[])
         printf("usage: %s [-r V6ROOT] [-v] cmd [args ...]\n", argv[0]);
         return 1;
     }
-    AOut aout = args[0];
+    AOut aout = convpath(args[0]);
     if (aout.image.empty())
     {
         printf("%s\n", aout.error.c_str());
