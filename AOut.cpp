@@ -12,18 +12,30 @@ void AOut::set(const std::string &path)
 {
     this->path = path;
     image.clear();
+    error.clear();
 
     struct stat st;
     if (stat(path.c_str(), &st) != 0 || !S_ISREG(st.st_mode) || st.st_size < 16)
+    {
+        error = path + ": file not found";
         return;
+    }
 
     FILE *f = fopen(path.c_str(), "rb");
-    if (!f) return;
+    if (!f)
+    {
+        error = path + ": can not open";
+        return;
+    }
 
     std::vector<uint8_t> header(16);
     fread(&header[0], 1, 16, f);
     fmagic = readvec16(header,  0);
-    if (fmagic != 0407 && fmagic != 0410) return;
+    if (fmagic != 0407 && fmagic != 0410)
+    {
+        error = path + ": not PDP-11 a.out file";
+        return;
+    }
 
     tsize  = readvec16(header,  2);
     dsize  = readvec16(header,  4);

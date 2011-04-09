@@ -11,6 +11,7 @@ public:
     uint16_t fmagic, tsize, dsize, bsize, ssize, entry, pad, relflg;
     std::vector<uint8_t> image;
     std::string path;
+    std::string error;
 
     AOut(const std::string &path);
     void set(const std::string &path);

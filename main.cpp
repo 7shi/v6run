@@ -21,6 +21,11 @@ int main(int argc, char *argv[])
         return 1;
     }
     AOut aout = args[0];
+    if (aout.image.empty())
+    {
+        printf("%s\n", aout.error.c_str());
+        return 0;
+    }
     VM vm = &aout;
     vm.run(args);
 }
