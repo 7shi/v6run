@@ -547,7 +547,6 @@ void VM::exec10()
             r[7] = C ? getOffset(r[7]) : r[7] + 2;
             return;
         case 0x89: // sys
-            if (verbose) debug("sys");
             sys();
             return;
     }

@@ -8,6 +8,7 @@
 extern std::string regnames[];
 
 std::string hex(int v);
+std::string oct(int v, int len = 0);
 std::string str(int v);
 std::string sdist(int d);
 void setroot(std::string root);

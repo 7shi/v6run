@@ -13,6 +13,22 @@ std::string hex(int v)
     return std::string(buf);
 }
 
+std::string oct(int v, int len)
+{
+    std::string ret;
+    char buf[] = { 0, 0 };
+    while (v)
+    {
+        buf[0] = '0' + (v & 7);
+        ret = buf + ret;
+        v >>= 3;
+    }
+    if (ret.empty()) ret = "0";
+    while (len > 0 && ret.size() < len)
+        ret = "0" + ret;
+    return ret;
+}
+
 std::string str(int v)
 {
     char buf[32];
