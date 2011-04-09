@@ -108,10 +108,10 @@ void VM::_write() // 4
 
 void VM::_open() // 5
 {
-    std::string path = getPath(getInc(7, 2));
+    std::string path = readstrp(getInc(7, 2));
     int mode = read16(getInc(7, 2));
     if (trace) debug("sys open; \"" + path + "\"; 0" + oct(mode, 3));
-    int result = open(path.c_str(), mode);
+    int result = open(convpath(path).c_str(), mode);
     r[0] = (C = (result == -1)) ? errno : result;
 }
 
@@ -134,33 +134,33 @@ void VM::_wait() // 7
 
 void VM::_creat() // 8
 {
-    std::string path = getPath(getInc(7, 2));
+    std::string path = readstrp(getInc(7, 2));
     int mode = read16(getInc(7, 2));
     if (trace) debug("sys creat; \"" + path + "\"; 0" + oct(mode, 3));
-    int result = creat(path.c_str(), mode);
+    int result = creat(convpath(path).c_str(), mode);
     r[0] = (C = (result == -1)) ? errno : result;
 }
 
 void VM::_link() // 9
 {
-    std::string src = getPath(getInc(7, 2));
-    std::string dst = getPath(getInc(7, 2));
+    std::string src = readstrp(getInc(7, 2));
+    std::string dst = readstrp(getInc(7, 2));
     if (trace) debug("sys link; \"" + src + "\"; \"" + dst + "\"");
-    int result = link(src.c_str(), dst.c_str());
+    int result = link(convpath(src).c_str(), convpath(dst).c_str());
     r[0] = (C = (result == -1)) ? errno : result;
 }
 
 void VM::_unlink() // 10
 {
-    std::string path = getPath(getInc(7, 2));
+    std::string path = readstrp(getInc(7, 2));
     if (trace) debug("sys unlink; \"" + path + "\"");
-    int result = unlink(path.c_str());
+    int result = unlink(convpath(path).c_str());
     r[0] = (C = (result == -1)) ? errno : result;
 }
 
 void VM::_exec() // 11
 {
-    std::string path = getPath(getInc(7, 2));
+    std::string path = readstrp(getInc(7, 2));
     std::vector<std::string> args = getArgs(-1, read16(getInc(7, 2)));
     if (trace)
     {
@@ -172,7 +172,7 @@ void VM::_exec() // 11
         }
         debug(buf + " }");
     }
-    AOut aout(path);
+    AOut aout(convpath(path));
     if (!aout.image.empty())
     {
         *this->aout = aout;
@@ -185,16 +185,16 @@ void VM::_exec() // 11
         for (std::vector<std::string>::iterator it = args.begin(); it != args.end(); ++it)
             argv.push_back(it->c_str());
         argv.push_back(NULL);
-        int result = execv(path.c_str(), const_cast<char *const *>(&argv[0]));
+        int result = execv(convpath(path).c_str(), const_cast<char *const *>(&argv[0]));
         r[0] = (C = (result == -1)) ? errno : result;
     }
 }
 
 void VM::_chdir() // 12
 {
-    std::string path = getPath(getInc(7, 2));
+    std::string path = readstrp(getInc(7, 2));
     if (trace) debug("sys chdir; \"" + path + "\"");
-    int result = chdir(path.c_str());
+    int result = chdir(convpath(path).c_str());
     r[0] = (C = (result == -1)) ? errno : result;
 }
 
@@ -216,10 +216,10 @@ void VM::_mknod() // 14
 
 void VM::_chmod() // 15
 {
-    std::string path = getPath(getInc(7, 2));
+    std::string path = readstrp(getInc(7, 2));
     int mode = read16(getInc(7, 2));
     if (trace) debug("sys chmod; \"" + path + "\"; 0" + oct(mode, 3));
-    int result = chmod(path.c_str(), mode);
+    int result = chmod(convpath(path).c_str(), mode);
     r[0] = (C = (result == -1)) ? errno : result;
 }
 
@@ -245,12 +245,12 @@ void VM::_break() // 17
 
 void VM::_stat() // 18
 {
-    std::string path = getPath(getInc(7, 2));
+    std::string path = readstrp(getInc(7, 2));
     int p = read16(getInc(7, 2));
     if (trace) debug("sys stat; \"" + path + "\"; " + hex(p));
     int *pst = (int *)&mem[p];
     struct stat st;
-    int result = stat(path.c_str(), &st);
+    int result = stat(convpath(path).c_str(), &st);
     if (C = (result == -1))
         r[0] = errno;
     else

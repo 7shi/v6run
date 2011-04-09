@@ -25,7 +25,7 @@ std::vector<std::string> VM::getArgs(int argc, int argv)
     int p;
     while (argc != 0 && (p = read16(argv)))
     {
-        ret.push_back(getString(p));
+        ret.push_back(readstr(p));
         argc--;
         argv += 2;
     }

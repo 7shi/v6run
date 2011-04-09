@@ -26,6 +26,8 @@ public:
     inline void write8(uint16_t pos, uint8_t v) { mem[pos] = v; }
     inline uint16_t read16(uint16_t pos) { return readvec16(mem, pos); }
     inline void write16(uint16_t pos, uint16_t v) { writevec16(&mem, pos, v); }
+    inline std::string readstr(uint16_t pos) { return (const char *)&mem[pos]; }
+    inline std::string readstrp(uint16_t pos) { return readstr(read16(pos)); }
 
     inline uint16_t getInc(int reg, int size)
     {
@@ -49,16 +51,6 @@ public:
     {
         r[reg] = v >> 16;
         r[(reg + 1) & 7] = v;
-    }
-
-    inline std::string getString(uint16_t pos)
-    {
-        return (const char *)&mem[pos];
-    }
-
-    inline std::string getPath(uint16_t pos)
-    {
-        return convpath(getString(pos));
     }
 
     inline void setFlags(bool z, bool n, bool c, bool v)
