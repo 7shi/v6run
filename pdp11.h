@@ -21,8 +21,9 @@ class AOut
 public:
     uint16_t fmagic, tsize, dsize, bsize, ssize, entry, pad, relflg;
     std::vector<uint8_t> image;
+    std::string path;
 
-    AOut(const std::string &file);
+    AOut(const std::string &path);
 };
 
 #endif

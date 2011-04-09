@@ -2,13 +2,15 @@
 #include <sys/stat.h>
 #include "pdp11.h"
 
-AOut::AOut(const std::string &file)
+AOut::AOut(const std::string &path)
 {
+    this->path = path;
+
     struct stat st;
-    if (stat(file.c_str(), &st) != 0 || !S_ISREG(st.st_mode) || st.st_size < 16)
+    if (stat(path.c_str(), &st) != 0 || !S_ISREG(st.st_mode) || st.st_size < 16)
         return;
 
-    FILE *f = fopen(file.c_str(), "rb");
+    FILE *f = fopen(path.c_str(), "rb");
     if (!f) return;
 
     std::vector<uint8_t> header(16);
