@@ -1,6 +1,9 @@
 TARGET   = v6run
 PREFIX   = /usr/local
-CXXFLAGS = -Wall -O2
+CXX      = g++
+CXXFLAGS = -Wall -O2 -g
+LDFLAGS  = 
+STRIP    = strip
 OBJECTS  = $(SOURCES:%.cpp=%.o)
 SOURCES  = \
 	AOut.cpp \
@@ -16,16 +19,17 @@ all: $(TARGET)
 
 .SUFFIXES: .cpp .o
 .cpp.o:
-	g++ $(CXXFLAGS) -o $@ -c $<
+	$(CXX) $(CXXFLAGS) -o $@ -c $<
 
 $(TARGET): $(OBJECTS)
-	g++ -s $(CXXFLAGS) -o $@ $(OBJECTS) $(LDFLAGS)
+	$(CXX) $(CXXFLAGS) -o $@ $(OBJECTS) $(LDFLAGS)
 
 clean:
-	rm -f $(TARGET) $(OBJECTS)
+	rm -f $(TARGET) $(OBJECTS) *core
 
 install: $(TARGET)
-	cp $< $(PREFIX)/bin
+	cp $(TARGET) $(PREFIX)/bin
+	$(STRIP) $(PREFIX)/bin/$(TARGET)
 
 depend:
 	rm -f dependencies
