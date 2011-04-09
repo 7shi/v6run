@@ -310,8 +310,9 @@ void VM::_setuid() // 23
 
 void VM::_getuid() // 24
 {
-    debug("sys getuid: not implemented");
-    C = true;
+    if (trace) debug("sys getuid");
+    int result = getuid();
+    r[0] = (C = (result == -1)) ? errno : result;
 }
 
 void VM::_stime() // 25
@@ -415,6 +416,7 @@ void VM::_setgid() // 46
 
 void VM::_getgid() // 47
 {
-    debug("sys getgid: not implemented");
-    C = true;
+    if (trace) debug("sys getgid");
+    int result = getgid();
+    r[0] = (C = (result == -1)) ? errno : result;
 }
