@@ -1,4 +1,4 @@
-#include <list>
+#include <vector>
 #include "AOut.h"
 #include "Operand.h"
 #include "utils.h"
@@ -12,7 +12,7 @@ private:
     static VM *current;
     AOut *aout;
     std::vector<uint8_t> mem;
-    uint16_t prevPC, *nextPC;
+    uint16_t prevPC, *nextPC, *indirBak;
     bool isLong, isDouble, hasExited;
     bool Z, N, C, V;
 
@@ -67,8 +67,9 @@ public:
         V = v;
     }
 
-    void setArgs(std::list<std::string> args);
-    void run(std::list<std::string> args);
+    std::vector<std::string> getArgs(int argc, int argv);
+    void setArgs(const std::vector<std::string> &args);
+    void run(const std::vector<std::string> &args);
     void run();
     void runStep();
     void abort(const std::string &msg);

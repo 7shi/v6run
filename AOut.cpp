@@ -23,6 +23,8 @@ void AOut::set(const std::string &path)
     std::vector<uint8_t> header(16);
     fread(&header[0], 1, 16, f);
     fmagic = readvec16(header,  0);
+    if (fmagic != 0407 && fmagic != 0410) return;
+
     tsize  = readvec16(header,  2);
     dsize  = readvec16(header,  4);
     bsize  = readvec16(header,  6);

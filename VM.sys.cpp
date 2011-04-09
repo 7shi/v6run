@@ -60,10 +60,11 @@ void VM::sys()
 
 void VM::_indir() // 0
 {
-    int bak = r[7];
+    uint16_t bak = r[7];
+    indirBak = &bak;
     r[7] = read16(getInc(7, 2));
     sys();
-    r[7] = bak;
+    if (indirBak) r[7] = *indirBak;
 }
 
 void VM::_exit() // 1
@@ -147,9 +148,24 @@ void VM::_unlink() // 10
 
 void VM::_exec() // 11
 {
-    r[7] += 4;
-    fprintf(stderr, "sys exec: not implemented\n");
-    C = true;
+    std::string path = getPath(getInc(7, 2));
+    std::vector<std::string> args = getArgs(-1, read16(getInc(7, 2)));
+    AOut aout(path);
+    if (!aout.image.empty())
+    {
+        *this->aout = aout;
+        set(this->aout);
+        setArgs(args);
+    }
+    else
+    {
+        std::vector<const char *> argv;
+        for (std::vector<std::string>::iterator it = args.begin(); it != args.end(); ++it)
+            argv.push_back(it->c_str());
+        argv.push_back(NULL);
+        int result = execv(path.c_str(), const_cast<char *const *>(&argv[0]));
+        r[0] = (C = (result == -1)) ? errno : result;
+    }
 }
 
 void VM::_chdir() // 12

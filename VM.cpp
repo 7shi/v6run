@@ -9,26 +9,39 @@ void VM::set(AOut *aout)
 {
     this->aout = aout;
     isLong = isDouble = hasExited = Z = N = C = V = false;
-    memset(r, 0, sizeof(r));
     memcpy(&mem[0], &aout->image[0], aout->image.size());
+    memset(r, 0, sizeof(r));
+    r[7] = aout->entry;
     prevPC = 0;
-    nextPC = NULL;
-    std::list<std::string> args;
+    nextPC = indirBak = NULL;
+    std::vector<std::string> args;
     args.push_back(aout->path);
     setArgs(args);
 }
 
-void VM::setArgs(std::list<std::string> args)
+std::vector<std::string> VM::getArgs(int argc, int argv)
+{
+    std::vector<std::string> ret;
+    int p;
+    while (argc != 0 && (p = read16(argv)))
+    {
+        ret.push_back(getString(p));
+        argc--;
+        argv += 2;
+    }
+    return ret;
+}
+
+void VM::setArgs(const std::vector<std::string> &args)
 {
     int p = 0x10000;
     std::vector<int> ptrs;
-    args.reverse();
-    for (std::list<std::string>::iterator it = args.begin(); it != args.end(); ++it)
+    for (int i = args.size() - 1; i >= 0; i--)
     {
-        int alen = it->size();
+        int alen = args[i].size();
         int blen = (alen / 2) * 2 + 2;
         p -= blen;
-        memcpy(&mem[p], it->c_str(), alen);
+        memcpy(&mem[p], args[i].c_str(), alen);
         memset(&mem[p + alen], 0, blen - alen);
         ptrs.push_back(p);
     }
@@ -42,9 +55,8 @@ void VM::setArgs(std::list<std::string> args)
     r[6] = p;
 }
 
-void VM::run(std::list<std::string> args)
+void VM::run(const std::vector<std::string> &args)
 {
-    args.push_front(aout->path);
     setArgs(args);
     run();
 }
