@@ -9,8 +9,9 @@ void VM::set(AOut *aout)
 {
     this->aout = aout;
     isLong = isDouble = hasExited = Z = N = C = V = false;
-    memcpy(&mem[0], &aout->image[0], aout->image.size());
     memset(r, 0, sizeof(r));
+    memset(&mem[0], 0, mem.size());
+    memcpy(&mem[0], &aout->image[0], aout->image.size());
     r[7] = aout->entry;
     prevPC = 0;
     nextPC = indirBak = NULL;
