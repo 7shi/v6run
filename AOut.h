@@ -1,7 +1,7 @@
 #ifndef _AOUT_H_
 #define _AOUT_H_
 
-#include <cstddef>
+#include <sys/types.h>
 #include <string>
 #include <vector>
 

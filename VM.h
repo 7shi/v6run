@@ -5,13 +5,15 @@
 
 class VM
 {
+public:
+    uint16_t r[8];
+
 private:
     AOut *aout;
     std::vector<uint8_t> mem;
     uint8_t prevPC;
     int pid;
     bool isLong, isDouble, hasExited;
-    uint16_t r[8];
     bool Z, N, C, V;
     std::vector<int> fds;
 
