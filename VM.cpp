@@ -96,7 +96,7 @@ int VM::getOffset(int pos)
 void VM::debug(const std::string &msg)
 {
     fprintf(stderr,
-        "%04x,%04x,%04x,%04x,%04x,%04x,sp=%04x,pc=%04x:%s\n",
+        "%04x,%04x,%04x,%04x,%04x,%04x,sp=%04x,pc=%04x: %s\n",
         r[0], r[1], r[2], r[3], r[4], r[5], r[6], prevPC, msg.c_str());
 }
 

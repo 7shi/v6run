@@ -196,8 +196,8 @@ void VM::exec0()
                     {
                         //case 3: // spl
                         case 0: // rts: ReTurn from Subroutine
-                            if (verbose) debug("rts");
                             reg = v & 7;
+                            if (verbose) debug("rts", reg);
                             r[7] = r[reg];
                             r[reg] = read16(getInc(6, 2));
                             return;
@@ -208,11 +208,23 @@ void VM::exec0()
                         {
                             // cl*/se*/ccc/scc: CLear/SEt (Condition Codes)
                             bool f = (v & 16) != 0;
-                            if (verbose) debug(f ? "se*" : "cl*");
-                            if ((v & 8) != 0) N = f;
-                            if ((v & 4) != 0) Z = f;
-                            if ((v & 2) != 0) V = f;
-                            if ((v & 1) != 0) C = f;
+                            if (verbose)
+                            {
+                                if (v == 0257)
+                                    debug("ccc");
+                                else if (v == 0277)
+                                    debug("scc");
+                                else
+                                    debug(std::string((f ? "se" : "cl")) +
+                                        (v & 8 ? "n" : "") +
+                                        (v & 4 ? "z" : "") +
+                                        (v & 2 ? "v" : "") +
+                                        (v & 1 ? "c" : ""));
+                            }
+                            if (v & 8) N = f;
+                            if (v & 4) Z = f;
+                            if (v & 2) V = f;
+                            if (v & 1) C = f;
                             r[7] += 2;
                             return;
                         }
