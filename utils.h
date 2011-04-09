@@ -6,6 +6,8 @@
 #include <string>
 
 std::string hex(int v);
+void setroot(std::string root);
+std::string convpath(const std::string &path);
 
 inline uint16_t readvec16(const std::vector<uint8_t> &vec, int pos)
 {
