@@ -16,12 +16,12 @@ std::string convpath(const std::string &path);
 bool startsWith(const std::string &s, const std::string &prefix);
 bool endsWith(const std::string &s, const std::string &prefix);
 
-inline uint16_t readvec16(const std::vector<uint8_t> &vec, int pos)
+inline uint16_t readvec16(const std::vector<uint8_t> &vec, uint16_t pos)
 {
     return vec[pos] | (vec[pos + 1] << 8);
 }
 
-inline void writevec16(std::vector<uint8_t> *vec, int pos, uint16_t v)
+inline void writevec16(std::vector<uint8_t> *vec, uint16_t pos, uint16_t v)
 {
     (*vec)[pos] = v;
     (*vec)[pos + 1] = v >> 8;

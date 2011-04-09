@@ -22,10 +22,10 @@ public:
     VM(AOut *aout);
     void set(AOut *aout);
 
-    inline uint8_t read8(int pos) { return mem[pos]; }
-    inline void write8(int pos, uint8_t v) { mem[pos] = v; }
-    inline uint16_t read16(int pos) { return readvec16(mem, pos); }
-    inline void write16(int pos, uint16_t v) { writevec16(&mem, pos, v); }
+    inline uint8_t read8(uint16_t pos) { return mem[pos]; }
+    inline void write8(uint16_t pos, uint8_t v) { mem[pos] = v; }
+    inline uint16_t read16(uint16_t pos) { return readvec16(mem, pos); }
+    inline void write16(uint16_t pos, uint16_t v) { writevec16(&mem, pos, v); }
 
     inline uint16_t getInc(int reg, int size)
     {
@@ -51,12 +51,12 @@ public:
         r[(reg + 1) & 7] = v;
     }
 
-    inline std::string getString(int pos)
+    inline std::string getString(uint16_t pos)
     {
         return (const char *)&mem[pos];
     }
 
-    inline std::string getPath(int pos)
+    inline std::string getPath(uint16_t pos)
     {
         return convpath(getString(pos));
     }
