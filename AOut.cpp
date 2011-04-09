@@ -1,6 +1,11 @@
 #include <stdio.h>
 #include <sys/stat.h>
-#include "pdp11.h"
+#include "AOut.h"
+
+inline static uint16_t read16(const std::vector<uint8_t> &vec, int pos)
+{
+    return vec[pos] | (vec[pos + 1] << 8);
+}
 
 AOut::AOut(const std::string &path)
 {
