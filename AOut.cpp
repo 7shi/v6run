@@ -5,7 +5,13 @@
 
 AOut::AOut(const std::string &path)
 {
+    set(path);
+}
+
+void AOut::set(const std::string &path)
+{
     this->path = path;
+    image.clear();
 
     struct stat st;
     if (stat(path.c_str(), &st) != 0 || !S_ISREG(st.st_mode) || st.st_size < 16)

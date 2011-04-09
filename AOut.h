@@ -13,6 +13,7 @@ public:
     std::string path;
 
     AOut(const std::string &path);
+    void set(const std::string &path);
 };
 
 #endif
