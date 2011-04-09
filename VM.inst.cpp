@@ -30,42 +30,42 @@ void VM::runStep()
         case 1: // mov: MOVe
             getSrcDst(&src, &dst, 2);
             if (verbose) debug("mov", src, dst);
-            srcv = src.getValue(this);
+            srcv = src.getValue();
             dst.setValue(srcv);
             setFlags(srcv == 0, int16_t(srcv) < 0, C, false);
             return;
         case 2: // cmp: CoMPare
             getSrcDst(&src, &dst, 2);
             if (verbose) debug("cmp", src, dst);
-            srcv = src.getValue(this);
-            dstv = dst.getValue(this);
+            srcv = src.getValue();
+            dstv = dst.getValue();
             val = int(int16_t(srcv)) - int(int16_t(dstv));
             setFlags(val == 0, val < 0, srcv < dstv, val < -0x8000);
             return;
         case 3: // bit: BIt Test
             getSrcDst(&src, &dst, 2);
             if (verbose) debug("bit", src, dst);
-            val = src.getValue(this) & dst.getValue(this);
+            val = src.getValue() & dst.getValue();
             setFlags(val == 0, (val & 0x8000) != 0, C, false);
             return;
         case 4: // bic: BIt Clear
             getSrcDst(&src, &dst, 2);
             if (verbose) debug("bic", src, dst);
-            val = (~src.getValue(this)) & dst.getValue(true);
+            val = (~src.getValue()) & dst.getValue(true);
             dst.setValue(val);
             setFlags(val == 0, (val & 0x8000) != 0, C, false);
             return;
         case 5: // bis: BIt Set
             getSrcDst(&src, &dst, 2);
             if (verbose) debug("bis", src, dst);
-            val = src.getValue(this) | dst.getValue(true);
+            val = src.getValue() | dst.getValue(true);
             dst.setValue(val);
             setFlags(val == 0, (val & 0x8000) != 0, C, false);
             return;
         case 6: // add: ADD
             getSrcDst(&src, &dst, 2);
             if (verbose) debug("add", src, dst);
-            srcv = src.getValue(this);
+            srcv = src.getValue();
             dstv = dst.getValue(true);
             val = int(int16_t(srcv)) + int(int16_t(dstv));
             dst.setValue(val);
@@ -80,42 +80,42 @@ void VM::runStep()
         case 011: // movb: MOVe Byte
             getSrcDst(&src, &dst, 1);
             if (verbose) debug("movb", src, dst);
-            srcb = src.getByte(this);
+            srcb = src.getByte();
             dst.setByte(srcb);
             setFlags(srcb == 0, int8_t(srcb) < 0, C, false);
             return;
         case 012: // cmpb: CoMPare Byte
             getSrcDst(&src, &dst, 1);
             if (verbose) debug("cmpb", src, dst);
-            srcb = src.getByte(this);
-            dstb = dst.getByte(this);
+            srcb = src.getByte();
+            dstb = dst.getByte();
             val = int(int8_t(srcb)) - int(int8_t(dstb));
             setFlags(val == 0, val < 0, srcb < dstb, val < -0x80);
             return;
         case 013: // bitb: BIt Test Byte
             getSrcDst(&src, &dst, 1);
             if (verbose) debug("bitb", src, dst);
-            val = src.getByte(this) & dst.getByte(this);
+            val = src.getByte() & dst.getByte();
             setFlags(val == 0, (val & 0x80) != 0, C, false);
             return;
         case 014: // bicb: BIt Clear Byte
             getSrcDst(&src, &dst, 1);
             if (verbose) debug("bicb", src, dst);
-            val = (~src.getByte(this)) & dst.getByte(true);
+            val = (~src.getByte()) & dst.getByte(true);
             dst.setByte(val);
             setFlags(val == 0, (val & 0x80) != 0, C, false);
             return;
         case 015: // bisb: BIt Set Byte
             getSrcDst(&src, &dst, 1);
             if (verbose) debug("bisb", src, dst);
-            val = src.getByte(this) | dst.getByte(true);
+            val = src.getByte() | dst.getByte(true);
             dst.setByte(val);
             setFlags(val == 0, (val & 0x80) != 0, C, false);
             return;
         case 016: // sub: SUBtract
             getSrcDst(&src, &dst, 2);
             if (verbose) debug("sub", src, dst);
-            srcv = src.getValue(this);
+            srcv = src.getValue();
             dstv = dst.getValue(true);
             val = int(int16_t(dstv)) - int(int16_t(srcv));
             dst.setValue(val);
@@ -265,7 +265,7 @@ void VM::exec0()
                 case 1: // com: COMplement
                     getDst(&dst, 2);
                     if (verbose) debug("com", dst);
-                    val = ~dst.getValue(this);
+                    val = ~dst.getValue(true);
                     dst.setValue(val);
                     setFlags(val == 0, (val & 0x8000) != 0, true, false);
                     return;
@@ -310,7 +310,7 @@ void VM::exec0()
                 case 7: // tst: TeST
                     getDst(&dst, 2);
                     if (verbose) debug("tst", dst);
-                    val = int16_t(dst.getValue(this));
+                    val = int16_t(dst.getValue());
                     setFlags(val == 0, val < 0, false, false);
                     return;
             }
@@ -408,7 +408,7 @@ void VM::exec7()
             getDst(&dst, 2);
             reg = (v >> 6) & 7;
             if (verbose) debug("mul", dst, reg);
-            int src = int16_t(dst.getValue(this));
+            int src = int16_t(dst.getValue());
             val = int(r[reg]) * src;
             if ((reg & 1) == 0)
                 setReg32(reg, val);
@@ -422,7 +422,7 @@ void VM::exec7()
             getDst(&dst, 2);
             reg = (v >> 6) & 7;
             if (verbose) debug("div", dst, reg);
-            int src = int16_t(dst.getValue(this));
+            int src = int16_t(dst.getValue());
             if (src == 0 || abs(int16_t(r[reg])) > abs(src))
                 setFlags(false, false, src == 0, true);
             else
@@ -440,7 +440,7 @@ void VM::exec7()
             getDst(&dst, 2);
             reg = (v >> 6) & 7;
             if (verbose) debug("ash", dst, reg);
-            int src = dst.getValue(this) & 077;
+            int src = dst.getValue() & 077;
             int val0 = int16_t(r[reg]);
             if (src == 0)
                 setFlags(val0 == 0, val0 < 0, C, false);
@@ -468,7 +468,7 @@ void VM::exec7()
             getDst(&dst, 2);
             reg = (v >> 6) & 7;
             if (verbose) debug("ashc", dst, reg);
-            int src = dst.getValue(this) & 077;
+            int src = dst.getValue() & 077;
             int val0 = getReg32(reg);
             if (src == 0)
                 setFlags(val0 == 0, val0 < 0, C, false);
@@ -611,7 +611,7 @@ void VM::exec10()
         case 057: // tstb: TeST Byte
             getDst(&dst, 1);
             if (verbose) debug("tstb", dst);
-            val = int8_t(dst.getByte(this));
+            val = int8_t(dst.getByte());
             setFlags(val == 0, val < 0, false, false);
             return;
         case 060: // rorb: ROtate Right Byte
