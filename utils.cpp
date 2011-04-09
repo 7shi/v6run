@@ -24,7 +24,7 @@ std::string oct(int v, int len)
         v >>= 3;
     }
     if (ret.empty()) ret = "0";
-    while (len > 0 && ret.size() < len)
+    while (len > 0 && (int)ret.size() < len)
         ret = "0" + ret;
     return ret;
 }
