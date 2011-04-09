@@ -56,7 +56,7 @@ void VM::run()
 
 void VM::abort(const std::string &msg)
 {
-    fprintf(stderr, "pc=%04x: %s", prevPC, msg.c_str());
+    fprintf(stderr, "pc=%04x: %s\n", prevPC, msg.c_str());
     hasExited = true;
 }
 
