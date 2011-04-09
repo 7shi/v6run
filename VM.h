@@ -75,9 +75,13 @@ public:
     void abort(const std::string &msg);
 
 private:
+    void exec0();
+    void exec7();
+    void exec10();
+    void exec17();
     void getSrcDst(Operand *src, Operand *dst, int size);
     void getDst(Operand *dst, int size, int len = 2);
-    void clearHandlers();
+    int getOffset(int pos);
 
     void sys();
     void _indir (); //  0

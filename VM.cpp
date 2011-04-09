@@ -86,3 +86,9 @@ void VM::getDst(Operand *dst, int size, int len)
     dst->set((v >> 3) & 7, v & 7, this, r[7] + len, size);
     r[7] += len + dst->length;
 }
+
+int VM::getOffset(int pos)
+{
+    int d = int8_t(read8(pos));
+    return pos + 2 + d * 2;
+}

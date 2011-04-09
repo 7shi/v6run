@@ -242,11 +242,11 @@ void VM::_seek() // 19
     switch (t)
     {
         case 0 : result = lseek(fd, p, SEEK_SET); break;
-        case 1 : result = lseek(fd, (int16_t)(uint16_t)p, SEEK_CUR); break;
-        case 2 : result = lseek(fd, (int16_t)(uint16_t)p, SEEK_END); break;
+        case 1 : result = lseek(fd, int16_t(uint16_t(p)), SEEK_CUR); break;
+        case 2 : result = lseek(fd, int16_t(uint16_t(p)), SEEK_END); break;
         case 3 : result = lseek(fd, p * 512, SEEK_SET); break;
-        case 4 : result = lseek(fd, ((int)(int16_t)(uint16_t)p) * 512, SEEK_CUR); break;
-        default: result = lseek(fd, ((int)(int16_t)(uint16_t)p) * 512, SEEK_END); break;
+        case 4 : result = lseek(fd, int(int16_t(uint16_t(p))) * 512, SEEK_CUR); break;
+        default: result = lseek(fd, int(int16_t(uint16_t(p))) * 512, SEEK_END); break;
     }
     r[0] = (C = (result == -1)) ? errno : result;
 }
