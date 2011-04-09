@@ -54,7 +54,7 @@ void VM::sys()
         case 47: _getgid(); return;
         case 48: _signal(); return;
     }
-    fprintf(stderr, "unknown syscall: %d\n", t);
+    debug("unknown syscall: " + str(t));
     C = true;
 }
 
@@ -186,7 +186,7 @@ void VM::_time() // 13
 void VM::_mknod() // 14
 {
     r[7] += 6;
-    fprintf(stderr, "sys mknod: not implemented\n");
+    debug("sys mknod: not implemented");
     C = true;
 }
 
@@ -201,7 +201,7 @@ void VM::_chmod() // 15
 void VM::_chown() // 16
 {
     r[7] += 4;
-    fprintf(stderr, "sys chown: not implemented\n");
+    debug("sys chown: not implemented");
     C = true;
 }
 
@@ -260,66 +260,66 @@ void VM::_getpid() // 20
 void VM::_mount() // 21
 {
     r[7] += 6;
-    fprintf(stderr, "sys mount: not implemented\n");
+    debug("sys mount: not implemented");
     C = true;
 }
 
 void VM::_umount() // 22
 {
     r[7] += 2;
-    fprintf(stderr, "sys umount: not implemented\n");
+    debug("sys umount: not implemented");
     C = true;
 }
 
 void VM::_setuid() // 23
 {
-    fprintf(stderr, "sys setuid: not implemented\n");
+    debug("sys setuid: not implemented");
     C = true;
 }
 
 void VM::_getuid() // 24
 {
-    fprintf(stderr, "sys getuid: not implemented\n");
+    debug("sys getuid: not implemented");
     C = true;
 }
 
 void VM::_stime() // 25
 {
-    fprintf(stderr, "sys getuid: not implemented\n");
+    debug("sys getuid: not implemented");
     C = true;
 }
 
 void VM::_ptrace() // 26
 {
     r[7] += 6;
-    fprintf(stderr, "sys ptrace: not implemented\n");
+    debug("sys ptrace: not implemented");
     C = true;
 }
 
 void VM::_fstat() // 28
 {
     r[7] += 2;
-    fprintf(stderr, "sys fstat: not implemented\n");
+    debug("sys fstat: not implemented");
     C = true;
 }
 
 void VM::_stty() // 31
 {
     r[7] += 2;
-    fprintf(stderr, "sys stty: not implemented\n");
+    debug("sys stty: not implemented");
     C = true;
 }
 
 void VM::_gtty() // 32
 {
     r[7] += 2;
-    fprintf(stderr, "sys gtty: not implemented\n");
+    debug("sys gtty: not implemented");
     C = true;
 }
 
 void VM::_nice() // 34
 {
-    fprintf(stderr, "sys nice: not implemented\n");
+    debug("sys nice: not implemented");
     C = true;
 }
 
@@ -331,20 +331,20 @@ void VM::_sleep() // 35
 
 void VM::_sync() // 36
 {
-    fprintf(stderr, "sys sync: not implemented\n");
+    debug("sys sync: not implemented");
     C = true;
 }
 
 void VM::_kill() // 37
 {
     r[7] += 2;
-    fprintf(stderr, "sys kill: not implemented\n");
+    debug("sys kill: not implemented");
     C = true;
 }
 
 void VM::_switch() // 38
 {
-    fprintf(stderr, "sys switch: not implemented\n");
+    debug("sys switch: not implemented");
     C = true;
 }
 
@@ -356,32 +356,32 @@ void VM::_dup() // 41
 
 void VM::_pipe() // 42
 {
-    fprintf(stderr, "sys pipe: not implemented\n");
+    debug("sys pipe: not implemented");
     C = true;
 }
 
 void VM::_times() // 43
 {
     r[7] += 2;
-    fprintf(stderr, "sys times: not implemented\n");
+    debug("sys times: not implemented");
     C = true;
 }
 
 void VM::_prof() // 44
 {
     r[7] += 8;
-    fprintf(stderr, "sys prof: not implemented\n");
+    debug("sys prof: not implemented");
     C = true;
 }
 
 void VM::_setgid() // 46
 {
-    fprintf(stderr, "sys setgid: not implemented\n");
+    debug("sys setgid: not implemented");
     C = true;
 }
 
 void VM::_getgid() // 47
 {
-    fprintf(stderr, "sys getgid: not implemented\n");
+    debug("sys getgid: not implemented");
     C = true;
 }

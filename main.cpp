@@ -3,6 +3,7 @@
 
 int main(int argc, char *argv[])
 {
+    bool verbose = false;
     std::vector<std::string> args;
     for (int i = 1; i < argc; i++)
     {
@@ -12,12 +13,14 @@ int main(int argc, char *argv[])
             i++;
             if (i < argc) setroot(argv[i]);
         }
+        else if (arg == "-v")
+            verbose = true;
         else
             args.push_back(arg);
     }
     if (args.empty())
     {
-        printf("usage: %s [-r V6ROOT] cmd [args ...]\n", argv[0]);
+        printf("usage: %s [-r V6ROOT] [-v] cmd [args ...]\n", argv[0]);
         return 1;
     }
     AOut aout = args[0];
@@ -27,5 +30,6 @@ int main(int argc, char *argv[])
         return 0;
     }
     VM vm = &aout;
+    vm.verbose = verbose;
     vm.run(args);
 }

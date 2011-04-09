@@ -17,6 +17,8 @@ private:
     bool Z, N, C, V;
 
 public:
+    bool verbose;
+
     VM(AOut *aout);
     void set(AOut *aout);
 
@@ -127,4 +129,12 @@ private:
     void _getgid(); // 47
     void _signal(); // 48
     static void sighandler(int sig);
+
+public:
+    void debug(const std::string &msg);
+    void debug(const std::string &op, const Operand &dst);
+    void debug(const std::string &op, const Operand &src, const Operand &dst);
+    void debug(const std::string &op, int reg);
+    void debug(const std::string &op, int reg, const Operand &dst);
+    void debug(const std::string &op, const Operand &dst, int reg);
 };

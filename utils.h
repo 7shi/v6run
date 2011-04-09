@@ -5,7 +5,11 @@
 #include <vector>
 #include <string>
 
+extern std::string regnames[];
+
 std::string hex(int v);
+std::string str(int v);
+std::string sdist(int d);
 void setroot(std::string root);
 std::string convpath(const std::string &path);
 bool startsWith(const std::string &s, const std::string &prefix);

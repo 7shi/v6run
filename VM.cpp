@@ -1,6 +1,6 @@
 #include "VM.h"
 
-VM::VM(AOut *aout) : mem(65536)
+VM::VM(AOut *aout) : mem(65536), verbose(false)
 {
     set(aout);
 }
@@ -69,21 +69,21 @@ void VM::run()
 
 void VM::abort(const std::string &msg)
 {
-    fprintf(stderr, "pc=%04x: %s\n", prevPC, msg.c_str());
+    debug(msg);
     hasExited = true;
 }
 
 void VM::getSrcDst(Operand *src, Operand *dst, int size)
 {
     uint16_t v = read16(r[7]);
-    src->set((v >> 9) & 7, (v >> 6) & 7, this, r[7] + 2, size);
+    src->set(this, (v >> 9) & 7, (v >> 6) & 7, r[7] + 2, size);
     getDst(dst, size, src->length + 2);
 }
 
 void VM::getDst(Operand *dst, int size, int len)
 {
     uint16_t v = read16(r[7]);
-    dst->set((v >> 3) & 7, v & 7, this, r[7] + len, size);
+    dst->set(this, (v >> 3) & 7, v & 7, r[7] + len, size);
     r[7] += len + dst->length;
 }
 
@@ -91,4 +91,36 @@ int VM::getOffset(int pos)
 {
     int d = int8_t(read8(pos));
     return pos + 2 + d * 2;
+}
+
+void VM::debug(const std::string &msg)
+{
+    fprintf(stderr,
+        "%04x,%04x,%04x,%04x,%04x,%04x,sp=%04x,pc=%04x:%s\n",
+        r[0], r[1], r[2], r[3], r[4], r[5], r[6], prevPC, msg.c_str());
+}
+
+void VM::debug(const std::string &op, const Operand &dst)
+{
+    debug(op + " " + dst.tos());
+}
+
+void VM::debug(const std::string &op, const Operand &src, const Operand &dst)
+{
+    debug(op + " " + src.tos() + ", " + dst.tos());
+}
+
+void VM::debug(const std::string &op, int reg)
+{
+    debug(op + " " + regnames[reg]);
+}
+
+void VM::debug(const std::string &op, int reg, const Operand &dst)
+{
+    debug(op + " " + regnames[reg] + ", " + dst.tos());
+}
+
+void VM::debug(const std::string &op, const Operand &dst, int reg)
+{
+    debug(op + " " + dst.tos() + ", " + regnames[reg]);
 }

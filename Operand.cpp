@@ -1,8 +1,9 @@
 #include "Operand.h"
 #include "VM.h"
 
-void Operand::set(int t, int r, VM *vm, int ad, int sz)
+void Operand::set(VM *vm, int t, int r, int ad, int sz)
 {
+    this->vm = vm;
     type = t;
     reg = r;
     dist = length = 0;
@@ -18,7 +19,7 @@ void Operand::set(int t, int r, VM *vm, int ad, int sz)
         length = 2;
 }
 
-uint16_t Operand::getAddress(VM *vm)
+uint16_t Operand::getAddress()
 {
     if (reg == 7)
     {
@@ -34,6 +35,7 @@ uint16_t Operand::getAddress(VM *vm)
     {
         switch (type)
         {
+            case 1: return vm->r[reg];
             case 2: return vm->getInc(reg, 2);
             case 3: return vm->read16(vm->getInc(reg, 2));
             case 4: return vm->getDec(reg, 2);
@@ -46,7 +48,7 @@ uint16_t Operand::getAddress(VM *vm)
     return 0;
 }
 
-uint16_t Operand::getValue(VM *vm, bool nomove)
+uint16_t Operand::getValue(bool nomove)
 {
     if (reg == 7)
     {
@@ -92,7 +94,7 @@ uint16_t Operand::getValue(VM *vm, bool nomove)
     return 0;
 }
 
-void Operand::setValue(VM *vm, uint16_t v)
+void Operand::setValue(uint16_t v)
 {
     if (reg == 7)
     {
@@ -123,7 +125,7 @@ void Operand::setValue(VM *vm, uint16_t v)
     vm->abort("invalid operand");
 }
 
-uint8_t Operand::getByte(VM *vm, bool nomove)
+uint8_t Operand::getByte(bool nomove)
 {
     int size = reg == 6 ? 2 : 1;
     if (reg == 7)
@@ -170,7 +172,7 @@ uint8_t Operand::getByte(VM *vm, bool nomove)
     return 0;
 }
 
-void Operand::setByte(VM *vm, uint8_t v)
+void Operand::setByte(uint8_t v)
 {
     int size = reg == 6 ? 2 : 1;
     if (reg == 7)
@@ -200,4 +202,31 @@ void Operand::setByte(VM *vm, uint8_t v)
         }
     }
     vm->abort("invalid operand");
+}
+
+std::string Operand::tos() const
+{
+    std::string rn = regnames[reg];
+    if (reg == 7)
+    {
+        switch (type)
+        {
+            case 2: return  "$" + hex(vm->read16(pc));
+            case 3: return "*$" + hex(vm->read16(pc));
+            case 6: return        hex(pc + dist);
+            case 7: return "*"  + hex(pc + dist);
+        }
+    }
+    switch (type)
+    {
+        case 0: return rn;
+        case 1: return   "(" + rn + ")" ;
+        case 2: return   "(" + rn + ")+";
+        case 3: return  "*(" + rn + ")+";
+        case 4: return  "-(" + rn + ")" ;
+        case 5: return "*-(" + rn + ")" ;
+        case 6: return       sdist(dist) + "(" + rn + ")";
+        case 7: return "*" + sdist(dist) + "(" + rn + ")";
+    }
+    return "?";
 }

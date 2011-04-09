@@ -1,5 +1,8 @@
 #include <sys/stat.h>
+#include <cstdlib>
 #include "utils.h"
+
+std::string regnames[] = { "r0", "r1", "r2", "r3", "r4", "r5", "sp", "pc" };
 
 static std::string rootpath;
 
@@ -7,6 +10,25 @@ std::string hex(int v)
 {
     char buf[32];
     snprintf(buf, sizeof(buf), "%04x", v & 0xffff);
+    return std::string(buf);
+}
+
+std::string str(int v)
+{
+    char buf[32];
+    snprintf(buf, sizeof(buf), "%d", v);
+    return std::string(buf);
+}
+
+std::string sdist(int v)
+{
+    char buf[32];
+    int d = int16_t(uint16_t(v));
+    int a = abs(d);
+    if (a < 10)
+        snprintf(buf, sizeof(buf), "%d", d);
+    else
+        snprintf(buf, sizeof(buf), "%s%x", d < 0 ? "-" : "", a);
     return std::string(buf);
 }
 
