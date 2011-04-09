@@ -28,6 +28,7 @@ void VM::_signal() // 48
 {
     int sig = read16(getInc(7, 2));
     int pcb = read16(getInc(7, 2));
+    if (trace) debug("sys signal; " + str(sig) + "; " + hex(pcb));
     if (sig < V6_NSIG)
     {
         r[0] = handlers[sig];
