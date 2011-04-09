@@ -1,11 +1,7 @@
-#include <stdio.h>
+#include <cstdio>
 #include <sys/stat.h>
 #include "AOut.h"
-
-inline static uint16_t read16(const std::vector<uint8_t> &vec, int pos)
-{
-    return vec[pos] | (vec[pos + 1] << 8);
-}
+#include "utils.h"
 
 AOut::AOut(const std::string &path)
 {
@@ -20,14 +16,14 @@ AOut::AOut(const std::string &path)
 
     std::vector<uint8_t> header(16);
     fread(&header[0], 1, 16, f);
-    fmagic = read16(header,  0);
-    tsize  = read16(header,  2);
-    dsize  = read16(header,  4);
-    bsize  = read16(header,  6);
-    ssize  = read16(header,  8);
-    entry  = read16(header, 10);
-    pad    = read16(header, 12);
-    relflg = read16(header, 14);
+    fmagic = readvec16(header,  0);
+    tsize  = readvec16(header,  2);
+    dsize  = readvec16(header,  4);
+    bsize  = readvec16(header,  6);
+    ssize  = readvec16(header,  8);
+    entry  = readvec16(header, 10);
+    pad    = readvec16(header, 12);
+    relflg = readvec16(header, 14);
 
     if (st.st_size - 16 >= tsize + dsize)
     {

@@ -2,13 +2,6 @@
 
 static int nextPid = 1;
 
-std::string hex(int v)
-{
-    char buf[32];
-    snprintf(buf, sizeof(buf), "%04x", v & 0xffff);
-    return std::string(buf);
-}
-
 VM::VM(AOut *aout) : aout(aout), mem(65536), pid(nextPid++)
 {
     isLong = isDouble = hasExited = Z = N = C = V = false;

@@ -1,8 +1,7 @@
 #include <list>
 #include "AOut.h"
 #include "Operand.h"
-
-std::string hex(int v);
+#include "utils.h"
 
 class VM
 {
@@ -21,17 +20,8 @@ public:
 
     inline uint8_t read8(int pos) { return mem[pos]; }
     inline void write8(int pos, uint8_t v) { mem[pos] = v; }
-
-    inline uint16_t read16(int pos)
-    {
-        return mem[pos] | (mem[pos + 1] << 8);
-    }
-
-    inline void write16(int pos, uint16_t v)
-    {
-        mem[pos] = v;
-        mem[pos + 1] = v >> 8;
-    }
+    inline uint16_t read16(int pos) { return readvec16(mem, pos); }
+    inline void write16(int pos, uint16_t v) { writevec16(&mem, pos, v); }
 
     inline uint16_t getInc(int reg, int size)
     {
