@@ -56,10 +56,6 @@ void VM::run()
     fds.clear();
 }
 
-void VM::runStep()
-{
-}
-
 void VM::abort(const std::string &msg)
 {
     fprintf(stderr, msg.c_str());
