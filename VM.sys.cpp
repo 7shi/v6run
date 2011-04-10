@@ -249,15 +249,25 @@ void VM::_stat() // 18
     std::string path = readstrp(getInc(7, 2));
     int p = read16(getInc(7, 2));
     if (trace) debug("sys stat; \"" + path + "\"; " + hex(p));
-    int *pst = (int *)&mem[p];
     struct stat st;
     int result = stat(convpath(path).c_str(), &st);
     if (C = (result == -1))
         r[0] = errno;
     else
     {
-        // TODO: convert stat
-        pst[0] = 0;
+        memset(&mem[p], 0, 36);
+        write16(p     , st.st_dev);
+        write16(p +  2, st.st_ino);
+        write16(p +  4, st.st_mode);
+        write8 (p +  6, st.st_nlink);
+        write8 (p +  7, st.st_uid);
+        write8 (p +  8, st.st_gid);
+        write8 (p +  9, st.st_size >> 16);
+        write16(p + 10, st.st_size);
+        write16(p + 28, st.st_atime >> 16);
+        write16(p + 30, st.st_atime);
+        write16(p + 32, st.st_mtime >> 16);
+        write16(p + 34, st.st_mtime);
         r[0] = result;
     }
 }
