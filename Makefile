@@ -36,7 +36,7 @@ install: $(TARGET)
 	sh mkwrap.sh $(TARGET) $(V6ROOT) $(PREFIX)/bin/v6as as
 	sh mkwrap.sh $(TARGET) $(V6ROOT) $(PREFIX)/bin/v6cc cc
 	sh mkwrap.sh $(TARGET) $(V6ROOT) $(PREFIX)/bin/v6ld ld
-	sh mkwrap.sh $(TARGET) $(V6ROOT) $(PREFIX)/bin/v6ld nm
+	sh mkwrap.sh $(TARGET) $(V6ROOT) $(PREFIX)/bin/v6nm nm
 	sh mkwrap.sh $(TARGET) $(V6ROOT) $(PREFIX)/bin/v6strip strip
 
 uninstall:
