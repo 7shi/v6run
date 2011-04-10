@@ -2,6 +2,7 @@
 #include <cstdlib>
 #include <unistd.h>
 #include <fcntl.h>
+#include <sys/stat.h>
 #include <sys/wait.h>
 #include "VM.h"
 #include "utils.h"
