@@ -29,6 +29,7 @@ clean:
 	rm -f $(TARGET) $(OBJECTS) *core
 
 install: $(TARGET)
+	mkdir -p $(PREFIX)/bin
 	cp $(TARGET) $(PREFIX)/bin
 	$(STRIP) $(PREFIX)/bin/$(TARGET)
 	sh mkwrap.sh $(TARGET) $(V6ROOT) $(PREFIX)/bin/v6ar ar
