@@ -4,7 +4,6 @@ V6ROOT   = $(PREFIX)/v6root
 CXX      = g++
 CXXFLAGS = -Wall -O2 -g
 LDFLAGS  = 
-STRIP    = strip
 OBJECTS  = $(SOURCES:%.cpp=%.o)
 SOURCES  = \
 	AOut.cpp \
@@ -26,21 +25,16 @@ $(TARGET): $(OBJECTS)
 	$(CXX) $(CXXFLAGS) -o $@ $(OBJECTS) $(LDFLAGS)
 
 clean:
-	rm -f $(TARGET) $(OBJECTS) *core
+	rm -f $(TARGET) $(TARGET).exe $(OBJECTS) *core
 
 install: $(TARGET)
 	mkdir -p $(PREFIX)/bin
-	cp $(TARGET) $(PREFIX)/bin
-	$(STRIP) $(PREFIX)/bin/$(TARGET)
-	sh mkwrap.sh $(TARGET) $(V6ROOT) $(PREFIX)/bin/v6ar ar
-	sh mkwrap.sh $(TARGET) $(V6ROOT) $(PREFIX)/bin/v6as as
-	sh mkwrap.sh $(TARGET) $(V6ROOT) $(PREFIX)/bin/v6cc cc
-	sh mkwrap.sh $(TARGET) $(V6ROOT) $(PREFIX)/bin/v6ld ld
-	sh mkwrap.sh $(TARGET) $(V6ROOT) $(PREFIX)/bin/v6nm nm
-	sh mkwrap.sh $(TARGET) $(V6ROOT) $(PREFIX)/bin/v6strip strip
+	install -cs $(TARGET) $(PREFIX)/bin
+	for cmd in ar as cc ld nm strip; do \
+	  sh mkwrap.sh $(TARGET) $(V6ROOT) $(PREFIX)/bin/v6 $$cmd; done
 
 uninstall:
-	cd $(PREFIX)/bin && rm -f $(TARGET) v6ar v6as v6cc v6ld v6strip
+	cd $(PREFIX)/bin && rm -f $(TARGET) $(TARGET).exe v6ar v6as v6cc v6ld v6nm v6strip
 
 depend:
 	rm -f dependencies

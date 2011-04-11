@@ -1,9 +1,14 @@
 #include <cerrno>
 #include <cstdlib>
+#include <cstring>
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/stat.h>
+#ifdef WIN32
+#include <windows.h>
+#else
 #include <sys/wait.h>
+#endif
 #include "VM.h"
 #include "utils.h"
 
@@ -80,9 +85,17 @@ void VM::_exit() // 1
 void VM::_fork() // 2
 {
     if (trace) debug("sys fork");
+#ifdef WIN32
+    VM vm;
+    vm = *this;
+    vm.run();
+    C = false;
+    r[7] += 2;
+#else
     int result = fork();
     r[0] = (C = (result == -1)) ? errno : result;
     if (!C && result) r[7] += 2;
+#endif
 }
 
 void VM::_read() // 3
@@ -129,10 +142,16 @@ void VM::_close() // 6
 void VM::_wait() // 7
 {
     if (trace) debug("sys wait");
+#ifdef WIN32
+    r[1] = 14; // status
+    r[0] = 1;
+    C = false;
+#else
     int status;
     int result = wait(&status);
     r[1] = status;
     r[0] = (C = (result == -1)) ? errno : result;
+#endif
 }
 
 void VM::_creat() // 8
@@ -149,8 +168,13 @@ void VM::_link() // 9
     std::string src = readstrp(getInc(7, 2));
     std::string dst = readstrp(getInc(7, 2));
     if (trace) debug("sys link; \"" + src + "\"; \"" + dst + "\"");
+#ifdef WIN32
+    C = !CopyFileA(src.c_str(), dst.c_str(), TRUE);
+    r[0] = C ? GetLastError() : 0;
+#else
     int result = link(convpath(src).c_str(), convpath(dst).c_str());
     r[0] = (C = (result == -1)) ? errno : result;
+#endif
 }
 
 void VM::_unlink() // 10
@@ -203,11 +227,16 @@ void VM::_chdir() // 12
 
 void VM::_time() // 13
 {
+#ifdef WIN32
+    debug("sys time: not implemented");
+    C = true;
+#else
     if (trace) debug("sys time");
     time_t result = time(NULL);
     r[0] = result >> 16;
     r[1] = result;
     C = false;
+#endif
 }
 
 void VM::_mknod() // 14
@@ -253,7 +282,8 @@ void VM::_stat() // 18
     if (trace) debug("sys stat; \"" + path + "\"; " + hex(p));
     struct stat st;
     int result = stat(convpath(path).c_str(), &st);
-    if (C = (result == -1))
+    C = result == -1;
+    if (C)
         r[0] = errno;
     else
     {
@@ -322,9 +352,14 @@ void VM::_setuid() // 23
 
 void VM::_getuid() // 24
 {
+#ifdef WIN32
+    debug("sys getuid: not implemented");
+    C = true;
+#else
     if (trace) debug("sys getuid");
     int result = getuid();
     r[0] = (C = (result == -1)) ? errno : result;
+#endif
 }
 
 void VM::_stime() // 25
@@ -369,9 +404,14 @@ void VM::_nice() // 34
 
 void VM::_sleep() // 35
 {
+#ifdef WIN32
+    debug("sys sleep: not implemented");
+    C = true;
+#else
     if (trace) debug("sys sleep");
     int result = sleep(r[0]);
     r[0] = (C = (result == -1)) ? errno : result;
+#endif
 }
 
 void VM::_sync() // 36
@@ -428,7 +468,12 @@ void VM::_setgid() // 46
 
 void VM::_getgid() // 47
 {
+#ifdef WIN32
+    debug("sys getgid: not implemented");
+    C = true;
+#else
     if (trace) debug("sys getgid");
     int result = getgid();
     r[0] = (C = (result == -1)) ? errno : result;
+#endif
 }

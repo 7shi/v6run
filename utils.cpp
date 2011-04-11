@@ -1,4 +1,5 @@
 #include <sys/stat.h>
+#include <cstdio>
 #include <cstdlib>
 #include "utils.h"
 

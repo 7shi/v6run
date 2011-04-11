@@ -1,3 +1,4 @@
+#include <cstring>
 #include <csignal>
 #include <cerrno>
 #include "VM.h"
@@ -33,6 +34,15 @@ void VM::_signal() // 48
     {
         r[0] = handlers[sig];
         handlers[sig] = pcb;
+#ifdef WIN32
+        switch (sig)
+        {
+            case V6_SIGINT : signal(SIGINT , &sighandler); break;
+            case V6_SIGINS : signal(SIGILL , &sighandler); break;
+            case V6_SIGFPT : signal(SIGFPE , &sighandler); break;
+            case V6_SIGSEG : signal(SIGSEGV, &sighandler); break;
+        }
+#else
         struct sigaction sa;
         memset(&sa, 0, sizeof(sa));
         if (!(pcb & 1)) sa.sa_handler = &sighandler;
@@ -52,6 +62,7 @@ void VM::_signal() // 48
             case V6_SIGSYS : sigaction(SIGSYS , &sa, NULL); break;
             case V6_SIGPIPE: sigaction(SIGPIPE, &sa, NULL); break;
         }
+#endif
         C = false;
     }
     else
