@@ -59,8 +59,9 @@ static int fileClose(VM *vm, int fd)
         {
             if (vm->trace)
                 fprintf(stderr, "delayed unlink: %s\n", path.c_str());
-            unlinks.erase(it2);
-            if (!DeleteFileA(path.c_str()) && vm->trace)
+            if (DeleteFileA(path.c_str()))
+                unlinks.erase(it2);
+            else if (vm->trace)
                 showError(GetLastError());
         }
 #endif
