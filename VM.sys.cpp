@@ -6,11 +6,17 @@
 #include <sys/stat.h>
 #ifdef WIN32
 #include <windows.h>
+#define NO_FORK
 #else
 #include <sys/wait.h>
 #endif
+#include <stack>
 #include "VM.h"
 #include "utils.h"
+
+#ifdef NO_FORK
+static std::stack<uint16_t> exitcodes;
+#endif
 
 void VM::sys()
 {
@@ -79,18 +85,22 @@ void VM::_indir() // 0
 void VM::_exit() // 1
 {
     if (trace) debug("sys exit");
-    exit(r[0]);
+    exitcode = r[0];
+#ifdef NO_FORK
+    exitcodes.push(exitcode);
+#endif
+    hasExited = true;
 }
 
 void VM::_fork() // 2
 {
     if (trace) debug("sys fork");
-#ifdef WIN32
-    VM vm;
-    vm = *this;
+#ifdef NO_FORK
+    VM vm = *this;
     vm.run();
-    C = false;
+    r[0] = 1;
     r[7] += 2;
+    C = false;
 #else
     int result = fork();
     r[0] = (C = (result == -1)) ? errno : result;
@@ -142,10 +152,14 @@ void VM::_close() // 6
 void VM::_wait() // 7
 {
     if (trace) debug("sys wait");
-#ifdef WIN32
-    r[1] = 14; // status
-    r[0] = 1;
-    C = false;
+#ifdef NO_FORK
+    C = exitcodes.empty();
+    if (!C)
+    {
+        r[1] = (exitcodes.top() << 8) | 14; // status
+        r[0] = 1;
+        exitcodes.pop();
+    }
 #else
     int status;
     int result = wait(&status);

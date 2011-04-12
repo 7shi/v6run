@@ -37,4 +37,5 @@ int main(int argc, char *argv[])
     VM vm = &aout;
     vm.trace = trace;
     vm.run(args);
+    return exitcode;
 }

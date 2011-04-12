@@ -3,6 +3,8 @@
 #include "Operand.h"
 #include "utils.h"
 
+extern int exitcode;
+
 class VM
 {
 public:
@@ -15,11 +17,6 @@ private:
     uint16_t prevPC, *nextPC, *indirBak;
     bool isLong, isDouble, hasExited;
     bool Z, N, C, V;
-
-#ifdef WIN32
-protected:
-    VM(); // for fork
-#endif
 
 public:
     int trace;

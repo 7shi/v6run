@@ -2,9 +2,7 @@
 #include <cstdio>
 #include "VM.h"
 
-#ifdef WIN32
-VM::VM() {}
-#endif
+int exitcode;
 
 VM::VM(AOut *aout) : mem(65536), trace(0)
 {
