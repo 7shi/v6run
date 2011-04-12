@@ -1,4 +1,5 @@
 #include <vector>
+#include <list>
 #include "AOut.h"
 #include "Operand.h"
 #include "utils.h"
@@ -9,6 +10,8 @@ class VM
 {
 public:
     uint16_t r[8];
+    bool Z, N, C, V;
+    int trace;
 
 private:
     static VM *current;
@@ -16,11 +19,9 @@ private:
     std::vector<uint8_t> mem;
     uint16_t prevPC, *nextPC, *indirBak;
     bool isLong, isDouble, hasExited;
-    bool Z, N, C, V;
+    std::list<int> handles;
 
 public:
-    int trace;
-
     VM(AOut *aout);
     void set(AOut *aout);
 

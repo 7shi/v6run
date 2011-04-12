@@ -1,6 +1,9 @@
 #include <sys/stat.h>
 #include <cstdio>
 #include <cstdlib>
+#ifdef WIN32
+#include <windows.h>
+#endif
 #include "utils.h"
 
 std::string regnames[] = { "r0", "r1", "r2", "r3", "r4", "r5", "sp", "pc" };
@@ -60,6 +63,10 @@ std::string convpath(const std::string &path)
 {
     if (path.empty() || path[0] != '/' || rootpath.empty()) return path;
 
+#ifdef WIN32
+    if (startsWith(path, "/tmp/"))
+        return getenv("TEMP") + path.substr(4);
+#endif
     std::string path2 = rootpath + path;
     struct stat st;
     if (stat(path2.c_str(), &st) == 0) return path2;
@@ -78,3 +85,44 @@ bool endsWith(const std::string &s, const std::string &prefix)
     if (s.size() < prefix.size()) return false;
     return s.substr(s.size() - prefix.size(), prefix.size()) == prefix;
 }
+
+std::string replace(const std::string &src, const std::string &s1, const std::string &s2)
+{
+    if (s1.empty()) return src;
+    std::string ret;
+    int p = 0;
+    while (p < (int)src.size())
+    {
+        int pp = src.find(s1, p);
+        if (pp < 0)
+        {
+            ret += src.substr(p);
+            break;
+        }
+        ret += src.substr(p, pp - p) + s2;
+        p = pp + s1.size();
+    }
+    return ret;
+}
+
+#ifdef WIN32
+std::string getErrorMessage(int err)
+{
+    LPVOID lpMsgBuf;
+    FormatMessage(
+        FORMAT_MESSAGE_ALLOCATE_BUFFER |
+        FORMAT_MESSAGE_FROM_SYSTEM |
+        FORMAT_MESSAGE_IGNORE_INSERTS,
+        NULL,
+        err,
+        MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+        (LPTSTR) &lpMsgBuf,
+        0,
+        NULL
+    );
+    std::string ret = replace((const char *)lpMsgBuf, "\r\n", "\n");
+    LocalFree(lpMsgBuf);
+    if (!endsWith(ret, "\n")) ret += "\n";
+    return ret;
+}
+#endif

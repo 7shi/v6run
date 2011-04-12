@@ -1,4 +1,5 @@
 #include <cerrno>
+#include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <unistd.h>
@@ -11,12 +12,61 @@
 #include <sys/wait.h>
 #endif
 #include <stack>
+#include <map>
+#include <algorithm>
 #include "VM.h"
 #include "utils.h"
 
 #ifdef NO_FORK
 static std::stack<uint16_t> exitcodes;
 #endif
+std::map<int, std::string> fd2name;
+
+#ifdef WIN32
+std::list<std::string> unlinks;
+
+static void showError(int err)
+{
+    fprintf(stderr, "%s", getErrorMessage(err).c_str());
+}
+
+static void procResult(VM *vm, bool ok)
+{
+    vm->C = !ok;
+    if (ok)
+        vm->r[0] = 0;
+    else
+    {
+        int err = GetLastError();
+        vm->r[0] = err;
+        if (vm->trace) showError(err);
+    }
+}
+#endif
+
+static int fileClose(VM *vm, int fd)
+{
+    int ret = close(fd);
+    std::map<int, std::string>::iterator it = fd2name.find(fd);
+    if (it != fd2name.end())
+    {
+        std::string path = it->second;
+        fd2name.erase(it);
+#ifdef WIN32
+        std::list<std::string>::iterator it2 =
+            std::find(unlinks.begin(), unlinks.end(), path);
+        if (it2 != unlinks.end())
+        {
+            if (vm->trace)
+                fprintf(stderr, "delayed unlink: %s\n", path.c_str());
+            unlinks.erase(it2);
+            if (!DeleteFileA(path.c_str()) && vm->trace)
+                showError(GetLastError());
+        }
+#endif
+    }
+    return ret;
+}
 
 void VM::sys()
 {
@@ -90,6 +140,9 @@ void VM::_exit() // 1
     exitcodes.push(exitcode);
 #endif
     hasExited = true;
+    for (std::list<int>::iterator it = handles.begin(); it != handles.end(); ++it)
+        fileClose(this, *it);
+    handles.clear();
 }
 
 void VM::_fork() // 2
@@ -97,6 +150,7 @@ void VM::_fork() // 2
     if (trace) debug("sys fork");
 #ifdef NO_FORK
     VM vm = *this;
+    vm.handles.clear();
     vm.run();
     r[0] = 1;
     r[7] += 2;
@@ -135,18 +189,28 @@ void VM::_write() // 4
 void VM::_open() // 5
 {
     std::string path = readstrp(getInc(7, 2));
-    int mode = read16(getInc(7, 2));
-    if (trace) debug("sys open; \"" + path + "\"; 0" + oct(mode, 3));
-    int result = open(convpath(path).c_str(), mode);
+    int flag = read16(getInc(7, 2));
+    if (trace) debug("sys open; \"" + path + "\"; " + str(flag));
+    std::string path2 = convpath(path);
+#if WIN32
+    flag |= O_BINARY;
+#endif
+    int result = open(path2.c_str(), flag);
     r[0] = (C = (result == -1)) ? errno : result;
+    if (!C)
+    {
+        fd2name[result] = path2;
+        handles.push_back(result);
+    }
 }
 
 void VM::_close() // 6
 {
     int fd = r[0];
     if (trace) debug("sys close");
-    int result = close(fd);
+    int result = fileClose(this, fd);
     r[0] = (C = (result == -1)) ? errno : result;
+    if (!C) handles.remove(result);
 }
 
 void VM::_wait() // 7
@@ -173,8 +237,18 @@ void VM::_creat() // 8
     std::string path = readstrp(getInc(7, 2));
     int mode = read16(getInc(7, 2));
     if (trace) debug("sys creat; \"" + path + "\"; 0" + oct(mode, 3));
-    int result = creat(convpath(path).c_str(), mode);
+    std::string path2 = convpath(path);
+#if WIN32
+    int result = open(path2.c_str(), O_CREAT | O_TRUNC | O_WRONLY | O_BINARY, 0777);
+#else
+    int result = creat(path2.c_str(), mode);
+#endif
     r[0] = (C = (result == -1)) ? errno : result;
+    if (!C)
+    {
+        fd2name[result] = path2;
+        handles.push_back(result);
+    }
 }
 
 void VM::_link() // 9
@@ -183,8 +257,7 @@ void VM::_link() // 9
     std::string dst = readstrp(getInc(7, 2));
     if (trace) debug("sys link; \"" + src + "\"; \"" + dst + "\"");
 #ifdef WIN32
-    C = !CopyFileA(src.c_str(), dst.c_str(), TRUE);
-    r[0] = C ? GetLastError() : 0;
+    procResult(this, CopyFileA(src.c_str(), dst.c_str(), TRUE));
 #else
     int result = link(convpath(src).c_str(), convpath(dst).c_str());
     r[0] = (C = (result == -1)) ? errno : result;
@@ -195,8 +268,23 @@ void VM::_unlink() // 10
 {
     std::string path = readstrp(getInc(7, 2));
     if (trace) debug("sys unlink; \"" + path + "\"");
-    int result = unlink(convpath(path).c_str());
+    std::string path2 = convpath(path);
+#ifdef WIN32
+    procResult(this, DeleteFileA(path2.c_str()));
+    if (C)
+    {
+        struct stat st;
+        if (stat(path2.c_str(), &st) != -1)
+        {
+            if (trace)
+                fprintf(stderr, "register delayed: %s\n", path2.c_str());
+            unlinks.push_back(path2);
+        }
+    }
+#else
+    int result = unlink(path2.c_str());
     r[0] = (C = (result == -1)) ? errno : result;
+#endif
 }
 
 void VM::_exec() // 11

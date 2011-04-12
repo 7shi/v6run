@@ -4,7 +4,7 @@
 
 int exitcode;
 
-VM::VM(AOut *aout) : mem(65536), trace(0)
+VM::VM(AOut *aout) : trace(0), mem(65536)
 {
     set(aout);
 }
