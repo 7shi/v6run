@@ -15,7 +15,10 @@ void VM::set(AOut *aout)
     isLong = isDouble = hasExited = Z = N = C = V = false;
     memset(r, 0, sizeof(r));
     memset(&mem[0], 0, mem.size());
-    memcpy(&mem[0], &aout->image[0], aout->image.size());
+    memcpy(&mem[0], &aout->image[0], aout->tsize);
+	int dstart = aout->tsize;
+	if (aout->fmagic == 0410) dstart = (dstart + 0x1fff) >> 13 << 13;
+    memcpy(&mem[dstart], &aout->image[aout->tsize], aout->dsize);
     r[7] = aout->entry;
     prevPC = 0;
     nextPC = indirBak = NULL;
