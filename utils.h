@@ -1,7 +1,7 @@
 #ifndef _UTILS_H_
 #define _UTILS_H_
 
-#include <sys/types.h>
+#include <stdint.h>
 #include <vector>
 #include <string>
 

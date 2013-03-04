@@ -1,7 +1,7 @@
 #ifndef _OPERAND_H_
 #define _OPERAND_H_
 
-#include <sys/types.h>
+#include <stdint.h>
 #include <string>
 
 class VM;
