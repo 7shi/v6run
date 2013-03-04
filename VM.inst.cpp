@@ -19,8 +19,8 @@ void VM::runStep()
     }
 
     Operand src, dst;
-    uint16_t srcv, dstv;
-    uint8_t srcb, dstb;
+    uint16_t srcv, dstv, val16;
+    uint8_t srcb, dstb, val8;
     int val;
     switch (read8(r[7] + 1) >> 4)
     {
@@ -39,8 +39,8 @@ void VM::runStep()
             if (trace > 1) debug("cmp", src, dst);
             srcv = src.getValue();
             dstv = dst.getValue();
-            val = int(int16_t(srcv)) - int(int16_t(dstv));
-            setFlags(val == 0, val < 0, srcv < dstv, val < -0x8000);
+            val16 = val = int(int16_t(srcv)) - int(int16_t(dstv));
+            setFlags(val16 == 0, val16 < 0, srcv < dstv, val != val16);
             return;
         case 3: // bit: BIt Test
             getSrcDst(&src, &dst, 2);
@@ -67,9 +67,9 @@ void VM::runStep()
             if (trace > 1) debug("add", src, dst);
             srcv = src.getValue();
             dstv = dst.getValue(true);
-            val = int(int16_t(srcv)) + int(int16_t(dstv));
-            dst.setValue(val);
-            setFlags(val == 0, val < 0, int(srcv) + int(dstv) >= 0x10000, val >= 0x8000);
+            val16 = val = int(int16_t(srcv)) + int(int16_t(dstv));
+            dst.setValue(val16);
+            setFlags(val16 == 0, val16 < 0, int(srcv) + int(dstv) >= 0x10000, val != val16);
             return;
         case 7:
             exec7();
@@ -89,8 +89,8 @@ void VM::runStep()
             if (trace > 1) debug("cmpb", src, dst);
             srcb = src.getByte();
             dstb = dst.getByte();
-            val = int(int8_t(srcb)) - int(int8_t(dstb));
-            setFlags(val == 0, val < 0, srcb < dstb, val < -0x80);
+            val8 = val = int(int8_t(srcb)) - int(int8_t(dstb));
+            setFlags(val8 == 0, val8 < 0, srcb < dstb, val != val8);
             return;
         case 013: // bitb: BIt Test Byte
             getSrcDst(&src, &dst, 1);
@@ -117,9 +117,9 @@ void VM::runStep()
             if (trace > 1) debug("sub", src, dst);
             srcv = src.getValue();
             dstv = dst.getValue(true);
-            val = int(int16_t(dstv)) - int(int16_t(srcv));
-            dst.setValue(val);
-            setFlags(val == 0, val < 0, dstv < srcv, val < -0x8000);
+            val16 = val = int(int16_t(dstv)) - int(int16_t(srcv));
+            dst.setValue(val16);
+            setFlags(val16 == 0, val16 < 0, dstv < srcv, val != val16);
             return;
         case 017:
             exec17();
