@@ -128,19 +128,16 @@ void VM::sys()
     if (type < nsyscalls) {
         syshandler *sh = &syscalls[type];
         if (sh->name) {
-            if (trace || !sh->f) {
-                fprintf(stderr, "system call %s", sh->name);
-            }
             if (sh->f) {
                 (this->*sh->f)();
             } else {
-                fprintf(stderr, ": not implemented\n");
+                debug("sys " + std::string(sh->name) + ": not implemented");
                 C = true;
             }
             return;
         }
     }
-    fprintf(stderr, "system call %d: unknown\n", type);
+    debug("unknown syscall: " + str(type));
     C = true;
 }
 
