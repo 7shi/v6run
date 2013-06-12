@@ -80,6 +80,13 @@ private:
     void getDst(Operand *dst, int size, int len = 2);
     int getOffset(int pos);
 
+    struct syshandler {
+        const char *name;
+        void (VM::*f)();
+    };
+    static const int nsyscalls = 49;
+    static syshandler syscalls[nsyscalls];
+
     void sys();
     void _indir (); //  0
     void _exit  (); //  1
@@ -94,34 +101,12 @@ private:
     void _unlink(); // 10
     void _exec  (); // 11
     void _chdir (); // 12
-    void _time  (); // 13
-    void _mknod (); // 14
     void _chmod (); // 15
-    void _chown (); // 16
     void _break (); // 17
     void _stat  (); // 18
     void _seek  (); // 19
     void _getpid(); // 20
-    void _mount (); // 21
-    void _umount(); // 22
-    void _setuid(); // 23
-    void _getuid(); // 24
-    void _stime (); // 25
-    void _ptrace(); // 26
-    void _fstat (); // 28
-    void _stty  (); // 31
-    void _gtty  (); // 32
-    void _nice  (); // 34
-    void _sleep (); // 35
-    void _sync  (); // 36
-    void _kill  (); // 37
-    void _switch(); // 38
     void _dup   (); // 41
-    void _pipe  (); // 42
-    void _times (); // 43
-    void _prof  (); // 44
-    void _setgid(); // 46
-    void _getgid(); // 47
     void _signal(); // 48
     static void sighandler(int sig);
 

@@ -69,56 +69,78 @@ static int fileClose(VM *vm, int fd)
     return ret;
 }
 
+VM::syshandler VM::syscalls[nsyscalls] = {
+    { "indir"  , &VM::_indir   }, //  0
+    { "exit"   , &VM::_exit    }, //  1
+    { "fork"   , &VM::_fork    }, //  2
+    { "read"   , &VM::_read    }, //  3
+    { "write"  , &VM::_write   }, //  4
+    { "open"   , &VM::_open    }, //  5
+    { "close"  , &VM::_close   }, //  6
+    { "wait"   , &VM::_wait    }, //  7
+    { "creat"  , &VM::_creat   }, //  8
+    { "link"   , &VM::_link    }, //  9
+    { "unlink" , &VM::_unlink  }, // 10
+    { "exec"   , &VM::_exec    }, // 11
+    { "chdir"  , &VM::_chdir   }, // 12
+    { "time"   , NULL          }, // 13
+    { "mknod"  , NULL          }, // 14
+    { "chmod"  , &VM::_chmod   }, // 15
+    { "chown"  , NULL          }, // 16
+    { "break"  , &VM::_break   }, // 17
+    { "stat"   , &VM::_stat    }, // 18
+    { "seek"   , &VM::_seek    }, // 19
+    { "getpid" , &VM::_getpid  }, // 20
+    { "mount"  , NULL          }, // 21
+    { "umount" , NULL          }, // 22
+    { "setuid" , NULL          }, // 23
+    { "getuid" , NULL          }, // 24
+    { "stime"  , NULL          }, // 25
+    { "ptrace" , NULL          }, // 26
+    { NULL     , NULL          }, // 27
+    { "fstat"  , NULL          }, // 28
+    { NULL     , NULL          }, // 29
+    { NULL     , NULL          }, // 30
+    { "stty"   , NULL          }, // 31
+    { "gtty"   , NULL          }, // 32
+    { NULL     , NULL          }, // 33
+    { "nice"   , NULL          }, // 34
+    { "sleep"  , NULL          }, // 35
+    { "sync"   , NULL          }, // 36
+    { "kill"   , NULL          }, // 37
+    { "switch" , NULL          }, // 38
+    { NULL     , NULL          }, // 39
+    { NULL     , NULL          }, // 40
+    { "dup"    , &VM::_dup     }, // 41
+    { "pipe"   , NULL          }, // 42
+    { "times"  , NULL          }, // 43
+    { "prof"   , NULL          }, // 44
+    { NULL     , NULL          }, // 45
+    { "setgid" , NULL          }, // 46
+    { "getgid" , NULL          }, // 47
+    { "signal" , &VM::_signal  }, // 48
+};
+
 void VM::sys()
 {
-    int t = mem[r[7]];
+    int type = mem[r[7]];
     r[7] += 2;
-    switch (t)
-    {
-        case  0: _indir (); return;
-        case  1: _exit  (); return;
-        case  2: _fork  (); return;
-        case  3: _read  (); return;
-        case  4: _write (); return;
-        case  5: _open  (); return;
-        case  6: _close (); return;
-        case  7: _wait  (); return;
-        case  8: _creat (); return;
-        case  9: _link  (); return;
-        case 10: _unlink(); return;
-        case 11: _exec  (); return;
-        case 12: _chdir (); return;
-        case 13: _time  (); return;
-        case 14: _mknod (); return;
-        case 15: _chmod (); return;
-        case 16: _chown (); return;
-        case 17: _break (); return;
-        case 18: _stat  (); return;
-        case 19: _seek  (); return;
-        case 20: _getpid(); return;
-        case 21: _mount (); return;
-        case 22: _umount(); return;
-        case 23: _setuid(); return;
-        case 24: _getuid(); return;
-        case 25: _stime (); return;
-        case 26: _ptrace(); return;
-        case 28: _fstat (); return;
-        case 31: _stty  (); return;
-        case 32: _gtty  (); return;
-        case 34: _nice  (); return;
-        case 35: _sleep (); return;
-        case 36: _sync  (); return;
-        case 37: _kill  (); return;
-        case 38: _switch(); return;
-        case 41: _dup   (); return;
-        case 42: _pipe  (); return;
-        case 43: _times (); return;
-        case 44: _prof  (); return;
-        case 46: _setgid(); return;
-        case 47: _getgid(); return;
-        case 48: _signal(); return;
+    if (type < nsyscalls) {
+        syshandler *sh = &syscalls[type];
+        if (sh->name) {
+            if (trace || !sh->f) {
+                fprintf(stderr, "system call %s", sh->name);
+            }
+            if (sh->f) {
+                (this->*sh->f)();
+            } else {
+                fprintf(stderr, ": not implemented\n");
+                C = true;
+            }
+            return;
+        }
     }
-    debug("unknown syscall: " + str(t));
+    fprintf(stderr, "system call %d: unknown\n", type);
     C = true;
 }
 
@@ -328,27 +350,6 @@ void VM::_chdir() // 12
     r[0] = (C = (result == -1)) ? errno : result;
 }
 
-void VM::_time() // 13
-{
-#ifdef WIN32
-    debug("sys time: not implemented");
-    C = true;
-#else
-    if (trace) debug("sys time");
-    time_t result = time(NULL);
-    r[0] = result >> 16;
-    r[1] = result;
-    C = false;
-#endif
-}
-
-void VM::_mknod() // 14
-{
-    r[7] += 6;
-    debug("sys mknod: not implemented");
-    C = true;
-}
-
 void VM::_chmod() // 15
 {
     std::string path = readstrp(getInc(7, 2));
@@ -356,13 +357,6 @@ void VM::_chmod() // 15
     if (trace) debug("sys chmod; \"" + path + "\"; 0" + oct(mode, 3));
     int result = chmod(convpath(path).c_str(), mode);
     r[0] = (C = (result == -1)) ? errno : result;
-}
-
-void VM::_chown() // 16
-{
-    r[7] += 4;
-    debug("sys chown: not implemented");
-    C = true;
 }
 
 void VM::_break() // 17
@@ -433,150 +427,9 @@ void VM::_getpid() // 20
     r[0] = (C = (result == -1)) ? errno : result;
 }
 
-void VM::_mount() // 21
-{
-    r[7] += 6;
-    debug("sys mount: not implemented");
-    C = true;
-}
-
-void VM::_umount() // 22
-{
-    r[7] += 2;
-    debug("sys umount: not implemented");
-    C = true;
-}
-
-void VM::_setuid() // 23
-{
-    debug("sys setuid: not implemented");
-    C = true;
-}
-
-void VM::_getuid() // 24
-{
-#ifdef WIN32
-    debug("sys getuid: not implemented");
-    C = true;
-#else
-    if (trace) debug("sys getuid");
-    int result = getuid();
-    r[0] = (C = (result == -1)) ? errno : result;
-#endif
-}
-
-void VM::_stime() // 25
-{
-    debug("sys getuid: not implemented");
-    C = true;
-}
-
-void VM::_ptrace() // 26
-{
-    r[7] += 6;
-    debug("sys ptrace: not implemented");
-    C = true;
-}
-
-void VM::_fstat() // 28
-{
-    r[7] += 2;
-    debug("sys fstat: not implemented");
-    C = true;
-}
-
-void VM::_stty() // 31
-{
-    r[7] += 2;
-    debug("sys stty: not implemented");
-    C = true;
-}
-
-void VM::_gtty() // 32
-{
-    r[7] += 2;
-    debug("sys gtty: not implemented");
-    C = true;
-}
-
-void VM::_nice() // 34
-{
-    debug("sys nice: not implemented");
-    C = true;
-}
-
-void VM::_sleep() // 35
-{
-#ifdef WIN32
-    debug("sys sleep: not implemented");
-    C = true;
-#else
-    if (trace) debug("sys sleep");
-    int result = sleep(r[0]);
-    r[0] = (C = (result == -1)) ? errno : result;
-#endif
-}
-
-void VM::_sync() // 36
-{
-    debug("sys sync: not implemented");
-    C = true;
-}
-
-void VM::_kill() // 37
-{
-    r[7] += 2;
-    debug("sys kill: not implemented");
-    C = true;
-}
-
-void VM::_switch() // 38
-{
-    debug("sys switch: not implemented");
-    C = true;
-}
-
 void VM::_dup() // 41
 {
     if (trace) debug("sys dup");
     int result = dup(r[0]);
     r[0] = (C = (result == -1)) ? errno : result;
-}
-
-void VM::_pipe() // 42
-{
-    debug("sys pipe: not implemented");
-    C = true;
-}
-
-void VM::_times() // 43
-{
-    r[7] += 2;
-    debug("sys times: not implemented");
-    C = true;
-}
-
-void VM::_prof() // 44
-{
-    r[7] += 8;
-    debug("sys prof: not implemented");
-    C = true;
-}
-
-void VM::_setgid() // 46
-{
-    debug("sys setgid: not implemented");
-    C = true;
-}
-
-void VM::_getgid() // 47
-{
-#ifdef WIN32
-    debug("sys getgid: not implemented");
-    C = true;
-#else
-    if (trace) debug("sys getgid");
-    int result = getgid();
-    r[0] = (C = (result == -1)) ? errno : result;
-#endif
 }
