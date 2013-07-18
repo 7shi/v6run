@@ -19,9 +19,9 @@ void VM::runStep()
     }
 
     Operand src, dst;
-    uint16_t srcv, dstv, val16;
-    uint8_t srcb, dstb, val8;
-    int val;
+    int srcv, dstv, val;
+    int16_t val16;
+    int8_t val8;
     switch (read8(r[7] + 1) >> 4)
     {
         case 0:
@@ -39,7 +39,7 @@ void VM::runStep()
             if (trace > 1) debug("cmp", src, dst);
             srcv = src.getValue();
             dstv = dst.getValue();
-            val16 = val = int(int16_t(srcv)) - int(int16_t(dstv));
+            val16 = val = int16_t(srcv) - int16_t(dstv);
             setFlags(val16 == 0, val16 < 0, srcv < dstv, val != val16);
             return;
         case 3: // bit: BIt Test
@@ -67,7 +67,7 @@ void VM::runStep()
             if (trace > 1) debug("add", src, dst);
             srcv = src.getValue();
             dstv = dst.getValue(true);
-            val16 = val = int(int16_t(srcv)) + int(int16_t(dstv));
+            val16 = val = int16_t(srcv) + int16_t(dstv);
             dst.setValue(val16);
             setFlags(val16 == 0, val16 < 0, int(srcv) + int(dstv) >= 0x10000, val != val16);
             return;
@@ -80,17 +80,17 @@ void VM::runStep()
         case 011: // movb: MOVe Byte
             getSrcDst(&src, &dst, 1);
             if (trace > 1) debug("movb", src, dst);
-            srcb = src.getByte();
-            dst.setByte(srcb);
-            setFlags(srcb == 0, int8_t(srcb) < 0, C, false);
+            srcv = src.getByte();
+            dst.setByte(srcv);
+            setFlags(srcv == 0, int8_t(srcv) < 0, C, false);
             return;
         case 012: // cmpb: CoMPare Byte
             getSrcDst(&src, &dst, 1);
             if (trace > 1) debug("cmpb", src, dst);
-            srcb = src.getByte();
-            dstb = dst.getByte();
-            val8 = val = int(int8_t(srcb)) - int(int8_t(dstb));
-            setFlags(val8 == 0, val8 < 0, srcb < dstb, val != val8);
+            srcv = src.getByte();
+            dstv = dst.getByte();
+            val8 = val = int8_t(srcv) - int8_t(dstv);
+            setFlags(val8 == 0, val8 < 0, srcv < dstv, val != val8);
             return;
         case 013: // bitb: BIt Test Byte
             getSrcDst(&src, &dst, 1);
@@ -117,7 +117,7 @@ void VM::runStep()
             if (trace > 1) debug("sub", src, dst);
             srcv = src.getValue();
             dstv = dst.getValue(true);
-            val16 = val = int(int16_t(dstv)) - int(int16_t(srcv));
+            val16 = val = int16_t(dstv) - int16_t(srcv);
             dst.setValue(val16);
             setFlags(val16 == 0, val16 < 0, dstv < srcv, val != val16);
             return;
@@ -272,14 +272,14 @@ void VM::exec0()
                 case 2: // inc: INCrement
                     getDst(&dst, 2);
                     if (trace > 1) debug("inc", dst);
-                    val = int(int16_t(dst.getValue(true))) + 1;
+                    val = int16_t(dst.getValue(true)) + 1;
                     dst.setValue(val);
                     setFlags(val == 0, val < 0, C, val == 0x8000);
                     return;
                 case 3: // dec: DECrement
                     getDst(&dst, 2);
                     if (trace > 1) debug("dec", dst);
-                    val = int(int16_t(dst.getValue(true))) - 1;
+                    val = int16_t(dst.getValue(true)) - 1;
                     dst.setValue(val);
                     setFlags(val == 0, val < 0, C, val == -0x8001);
                     return;
@@ -296,14 +296,14 @@ void VM::exec0()
                 case 5: // adc: ADd Carry
                     getDst(&dst, 2);
                     if (trace > 1) debug("adc", dst);
-                    val = int(int16_t(dst.getValue(true))) + (C ? 1 : 0);
+                    val = int16_t(dst.getValue(true)) + (C ? 1 : 0);
                     dst.setValue(val);
                     setFlags(val == 0, val < 0, C && val == 0, val == 0x8000);
                     return;
                 case 6: // sbc: SuBtract Carry
                     getDst(&dst, 2);
                     if (trace > 1) debug("sbc", dst);
-                    val = int(int16_t(dst.getValue(true))) - (C ? 1 : 0);
+                    val = int16_t(dst.getValue(true)) - (C ? 1 : 0);
                     dst.setValue(val);
                     setFlags(val == 0, val < 0, C && val == -1, val == -0x8001);
                     return;
@@ -573,14 +573,14 @@ void VM::exec10()
         case 052: // incb: INCrement Byte
             getDst(&dst, 1);
             if (trace > 1) debug("incb", dst);
-            val = int(int8_t(dst.getByte(true))) + 1;
+            val = int8_t(dst.getByte(true)) + 1;
             dst.setByte(val);
             setFlags(val == 0, val < 0, C, val == 0x80);
             return;
         case 053: // decb: DECrement Byte
             getDst(&dst, 1);
             if (trace > 1) debug("decb", dst);
-            val = int(int8_t(dst.getByte(true))) - 1;
+            val = int8_t(dst.getByte(true)) - 1;
             dst.setByte(val);
             setFlags(val == 0, val < 0, C, val == -0x81);
             return;
@@ -597,14 +597,14 @@ void VM::exec10()
         case 055: // adcb: ADd Carry Byte
             getDst(&dst, 1);
             if (trace > 1) debug("adcb", dst);
-            val = int(int8_t(dst.getByte(true))) + (C ? 1 : 0);
+            val = int8_t(dst.getByte(true)) + (C ? 1 : 0);
             dst.setByte(val);
             setFlags(val == 0, val < 0, C && val == 0, val == 0x80);
             return;
         case 056: // sbcb: SuBtract Carry Byte
             getDst(&dst, 1);
             if (trace > 1) debug("sbcb", dst);
-            val = int(int8_t(dst.getByte(true))) - (C ? 1 : 0);
+            val = int8_t(dst.getByte(true)) - (C ? 1 : 0);
             dst.setByte(val);
             setFlags(val == 0, val < 0, C && val == -1, val == -0x81);
             return;
